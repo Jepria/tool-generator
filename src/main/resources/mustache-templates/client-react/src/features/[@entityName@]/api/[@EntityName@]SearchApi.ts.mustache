@@ -1,0 +1,12 @@
+import { [@EntityName@], [@EntityName@]SearchTemplate } from "./[@EntityName@]Types";
+import { ConnectorSearch } from "@jfront/core-rest";
+import { API_PATH } from "../../../config";
+import axios from 'axios'
+
+class [@EntityName@]SearchApi extends ConnectorSearch<[@EntityName@], [@EntityName@]SearchTemplate> {
+  constructor(baseUrl: string) {
+    super(baseUrl, false, axios);
+  }
+}
+
+export const [@entityName@]SearchApi = new [@EntityName@]SearchApi(API_PATH + "/[@entity_name_dash@]");

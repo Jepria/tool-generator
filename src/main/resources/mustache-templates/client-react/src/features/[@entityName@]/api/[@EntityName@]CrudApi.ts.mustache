@@ -1,0 +1,12 @@
+import {ConnectorCrud} from "@jfront/core-rest";
+import {API_PATH} from "../../../config";
+import {[@EntityName@], [@EntityName@]Create, [@EntityName@]Update} from "./[@EntityName@]Types";
+import axios from 'axios'
+
+class [@EntityName@]CrudApi extends ConnectorCrud<[@EntityName@], [@EntityName@]Create, [@EntityName@]Update> {
+  constructor(baseUrl: string) {
+    super(baseUrl, false, axios);
+  }
+}
+
+export const [@entityName@]CrudApi = new [@EntityName@]CrudApi(API_PATH + "/[@entity_name_dash@]");

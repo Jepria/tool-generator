@@ -1,0 +1,116 @@
+import React, { useEffect, useRef, useState } from "react";
+import {useHistory, useParams} from "react-router-dom";
+import {useFormik} from "formik";
+import {useTranslation} from "react-i18next";
+import {useDispatch, useSelector} from "react-redux";
+import {ComboBox, ComboBoxItem, Form, DatePicker, NumberInput, TextInput} from "@jfront/ui-core";
+import {
+  [@#fieldsEdit@]
+  [@#isTypeOption@][@FieldName@]Option,[@/isTypeOption@]
+  [@/fieldsEdit@]
+  [@EntityName@], [@EntityName@]Update} from "../api/[@EntityName@]Types";
+import {select[@EntityName@], selectSaveOnEdit[@EntityName@], setCurrentRecord, submitSaveOnEdit} from "../[@entityName@]Slice";
+import {[@entityName@]CrudApi} from "../api/[@EntityName@]CrudApi";
+import {
+  [@#fieldsEdit@]
+  [@#isTypeOption@]get[@FieldName@]Options,[@/isTypeOption@]
+  [@/fieldsEdit@]
+} from "../api/[@EntityName@]Api";
+import queryString from "query-string";
+
+const [@EntityName@]EditPage = () => {
+  //----------------
+  let formRef = useRef(null) as any;
+  const { t } = useTranslation();
+  const history = useHistory();
+  const dispatch = useDispatch();
+  //----------------
+
+  [@#fieldsEdit@]
+  [@#isTypeOption@]const [[@fieldName@]Options, set[@FieldName@]Options] = useState<[@FieldName@]Option[]>();[@/isTypeOption@]
+  [@/fieldsEdit@]
+  
+  let { [@entityId@]: [@entityId@] } = useParams();
+  const currentRecord: [@EntityName@] = useSelector(select[@EntityName@]);
+
+  const onSave[@EntityName@] = useSelector(selectSaveOnEdit[@EntityName@]);
+  useEffect(() => {
+    if (onSave[@EntityName@]) {
+      dispatch(submitSaveOnEdit());
+      formRef.current?.dispatchEvent(new Event("submit"));
+    }
+  }, [onSave[@EntityName@]]);
+
+  useEffect(() => {
+    [@entityName@]CrudApi.getRecordById([@entityId@]).then(([@entityName@]) => {
+      dispatch(setCurrentRecord([@entityName@]));
+    });
+  }, []);
+
+  [@#fieldsEdit@]
+  [@#isTypeOption@]
+  useEffect(() => {
+    get[@FieldName@]Options().then((options) => {
+      set[@FieldName@]Options(options);
+    });
+  }, []);
+  [@/isTypeOption@]
+  [@/fieldsEdit@]
+
+  const formik = useFormik<[@EntityName@]Update>({
+    initialValues: {
+      [@#fieldsEdit@]
+      [@fieldName@][@#isTypeOption@]Code[@/isTypeOption@]: currentRecord?.[@fieldName@] ? [@#isTypeDate@]new Date([@/isTypeDate@]currentRecord?.[@fieldName@][@#isTypeOption@].value[@/isTypeOption@][@#isTypeDate@])[@/isTypeDate@] : [@#isTypeOption@]""[@/isTypeOption@][@#isTypeText@]""[@/isTypeText@][@#isTypeDate@]null[@/isTypeDate@],
+      [@/fieldsEdit@]
+    },
+    onSubmit: (values: [@EntityName@]Update) => {
+      if ([@entityId@]) {
+        [@entityName@]CrudApi.update([@entityId@].toString(), values).then(() => {
+          history.push(`/[@entity_name_dash@]/${[@entityId@]}/detail`);
+        });
+      }
+    },
+    validate: (values) => {
+      const errors: {
+        [@#fieldsEdit@]
+        [@#isFieldRequired@]
+        [@fieldName@][@#isTypeOption@]Code[@/isTypeOption@]?: string;
+        [@/isFieldRequired@]
+        [@/fieldsEdit@]
+      } = {};
+      [@#fieldsEdit@]
+      [@#isFieldRequired@]
+      if (!values.[@fieldName@][@#isTypeOption@]Code[@/isTypeOption@]) {
+        errors.[@fieldName@][@#isTypeOption@]Code[@/isTypeOption@] = t("validation.notEmpty");
+      }
+      [@/isFieldRequired@]
+      [@/fieldsEdit@]
+      
+      // TODO вызов должен быть не из formik.validate, а из formik.handleChange
+      updateQueryString(values);
+      
+      return errors;
+    },
+    enableReinitialize: true,
+  });
+
+  // TODO переместить на системный уровень
+  function updateQueryString(values) {
+    let query = queryString.stringify(values);
+    history.replace(`?${query}`);
+  }
+
+  return (
+    <>
+      <Form id="form-edit" onSubmit={formik.handleSubmit} ref={formRef}>
+        
+        [@#fieldsEdit@]
+        [@>FieldTemplate.mustache@]
+        [@/fieldsEdit@]
+        
+      </Form>
+    </>
+  );
+};
+
+export default [@EntityName@]EditPage;

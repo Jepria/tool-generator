@@ -1,0 +1,35 @@
+//TODO interface to type?
+export interface [@EntityName@] {
+  [@entityId@]: number;
+  directionType: {
+    name: string;
+    value: string;
+  };
+  documentMarkName: string;
+  beginDate: Date;
+  endDate: Date;
+}
+
+export interface [@EntityName@]Create {
+  directionTypeCode: string;
+  documentMarkName: string;
+  beginDate: Date;
+}
+
+export interface [@EntityName@]Update {
+  directionTypeCode: string;
+  documentMarkName: string;
+  beginDate: Date;
+  endDate: Date;
+}
+
+export interface [@EntityName@]SearchTemplate { // в поисковом dto везде ставим вопросики
+  directionTypeCode?: string;
+  documentMarkName?: string;
+  maxRowCount?: number;
+}
+
+export interface DirectionTypeOption {
+  name: string;
+  value: string;
+}

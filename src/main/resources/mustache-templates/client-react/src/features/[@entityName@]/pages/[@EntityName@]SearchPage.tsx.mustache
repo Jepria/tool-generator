@@ -1,0 +1,104 @@
+import React, { useEffect, useRef, useState } from "react";
+import {useHistory} from "react-router-dom";
+import {useFormik} from "formik";
+import {useTranslation} from "react-i18next";
+import {useDispatch, useSelector} from "react-redux";
+import {ComboBox, ComboBoxItem, Form, DatePicker, NumberInput, TextInput} from "@jfront/ui-core";
+import {
+  [@#fieldsSearch@]
+  [@#isTypeOption@][@FieldName@]Option,[@/isTypeOption@]
+  [@/fieldsSearch@]
+  [@EntityName@]SearchTemplate} from "../api/[@EntityName@]Types";
+import {
+  [@#fieldsSearch@]
+  [@#isTypeOption@]get[@FieldName@]Options,[@/isTypeOption@]
+  [@/fieldsSearch@]
+} from "../api/[@EntityName@]Api";
+import {selectSearchSubmit, selectSearchTemplate, submitSearch} from "../[@entityName@]SearchSlice";
+import queryString from "query-string";
+
+const [@EntityName@]SearchPage = () => {
+  //----------------
+  let formRef = useRef(null) as any;
+  const { t } = useTranslation();
+  const history = useHistory();
+  const dispatch = useDispatch();
+  //----------------
+
+  [@#fieldsSearch@]
+  [@#isTypeOption@]const [[@fieldName@]Options, set[@FieldName@]Options] = useState<[@FieldName@]Option[]>();[@/isTypeOption@]
+  [@/fieldsSearch@]
+  
+  const selectSearch = useSelector(selectSearchSubmit);
+  const searchTemplate: [@EntityName@]SearchTemplate = useSelector(selectSearchTemplate);
+
+  useEffect(() => {
+    if (selectSearch) {
+      formRef.current?.dispatchEvent(new Event("submit"));
+      dispatch(submitSearch(false));
+    }
+  }, [selectSearch]);
+
+  [@#fieldsSearch@]
+  [@#isTypeOption@]
+  useEffect(() => {
+    get[@FieldName@]Options().then((options) => {
+      set[@FieldName@]Options(options);
+    });
+  }, []);
+  [@/isTypeOption@]
+  [@/fieldsSearch@]
+
+  const formik = useFormik<[@EntityName@]SearchTemplate>({
+    initialValues: searchTemplate,
+    enableReinitialize: true,
+    onSubmit: (values) => {
+      let query = queryString.stringify(values);
+      if (query) {
+        query = "&" + query;
+      }
+      history.push(`/[@entity_name_dash@]/list/?pageSize=25&page=1${query}`);
+    },
+    validate: (values) => {
+      const errors: {
+        [@#fieldsSearch@]
+        [@#isFieldRequired@]
+        [@fieldName@][@#isTypeOption@]Code[@/isTypeOption@]?: string;
+        [@/isFieldRequired@]
+        [@/fieldsSearch@]
+      } = {};
+      [@#fieldsSearch@]
+      [@#isFieldRequired@]
+      if (!values.[@fieldName@][@#isTypeOption@]Code[@/isTypeOption@]) {
+        errors.[@fieldName@][@#isTypeOption@]Code[@/isTypeOption@] = t("validation.notEmpty");
+      }
+      [@/isFieldRequired@]
+      [@/fieldsSearch@]
+      
+      // TODO вызов должен быть не из formik.validate, а из formik.handleChange
+      updateQueryString(values);
+      
+      return errors;
+    },
+  });
+
+  // TODO переместить на системный уровень
+  function updateQueryString(values) {
+    let query = queryString.stringify(values);
+    history.replace(`?${query}`);
+  }
+
+  return (
+    <>
+      <Form id="form-search" onSubmit={formik.handleSubmit} ref={formRef}>
+        
+        [@#fieldsSearch@]
+        [@>FieldTemplate.mustache@]
+        [@/fieldsSearch@]
+        
+      </Form>
+    </>
+  );
+};
+
+export default [@EntityName@]SearchPage;

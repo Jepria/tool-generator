@@ -1,0 +1,64 @@
+[@#isTypeOption@]
+<Form.Field>
+  <Form.Label[@#isFieldRequired@] required[@/isFieldRequired@]>{t("[@entityName@].fields.[@fieldName@]")}</Form.Label>
+  <Form.Control[@#isFieldRequired@] error={formik.errors.[@fieldName@]Code as string}[@/isFieldRequired@] style={{ maxWidth: "150px" }}>
+    <ComboBox
+      name="[@fieldName@]"
+      value={formik.values.[@fieldName@]Code}
+      onSelectionChange={(name, value) => {
+        formik.setFieldValue("[@fieldName@]Code", value);
+      }}
+    >
+      {[@fieldName@]Options
+        ? [@fieldName@]Options.map((option) => {
+          return (
+            <ComboBoxItem key={option.value} value={option.value} label={option.name} />
+          );
+        })
+        : null}
+    </ComboBox>
+  </Form.Control>
+</Form.Field>
+[@/isTypeOption@]
+
+[@#isTypeText@]
+<Form.Field>
+  <Form.Label[@#isFieldRequired@] required[@/isFieldRequired@]>{t("[@entityName@].fields.[@fieldName@]")}</Form.Label>
+  <Form.Control[@#isFieldRequired@] error={formik.errors.[@fieldName@] as string}[@/isFieldRequired@]>
+    <TextInput
+      name="[@fieldName@]"
+      value={formik.values.[@fieldName@]}
+      onChange={formik.handleChange}
+    />
+  </Form.Control>
+</Form.Field>
+[@/isTypeText@]
+
+[@#isTypeDate@]
+<Form.Field>
+  <Form.Label[@#isFieldRequired@] required[@/isFieldRequired@]>{t("[@entityName@].fields.[@fieldName@]")}</Form.Label>
+  <Form.Control[@#isFieldRequired@] error={formik.errors.[@fieldName@] as string}[@/isFieldRequired@] style={{ maxWidth: "150px" }}>
+    <DatePicker
+      name="[@fieldName@]"
+      selected={formik.values?.[@fieldName@]}
+      onChange={(date) => {
+        formik.setFieldValue("[@fieldName@]", date);
+      }}
+    />
+  </Form.Control>
+</Form.Field>
+[@/isTypeDate@]
+
+[@#isTypeInt@]
+<Form.Field>
+  <Form.Label[@#isFieldRequired@] required[@/isFieldRequired@]>{t("[@entityName@].fields.[@fieldName@]")}</Form.Label>
+  <Form.Control error={formik.errors.[@fieldName@] as string}>
+    <NumberInput
+      name="[@fieldName@]"
+      value={formik.values.[@fieldName@]}
+      onChange={formik.handleChange}
+      autoComplete="off"
+    />
+  </Form.Control>
+</Form.Field>
+[@/isTypeInt@]

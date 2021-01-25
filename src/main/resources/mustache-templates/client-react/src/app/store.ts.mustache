@@ -1,0 +1,13 @@
+import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
+import [@entityName@]Reducer from "../features/[@entityName@]/[@entityName@]Slice";
+import [@entityName@]SearchReducer from "../features/[@entityName@]/[@entityName@]SearchSlice";
+
+export const store = configureStore({
+  reducer: {
+    [@entityName@]: [@entityName@]Reducer,
+    [@entityName@]Search: [@entityName@]SearchReducer,
+  },
+});
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppThunk = ThunkAction<void, RootState, unknown, Action<string>>;

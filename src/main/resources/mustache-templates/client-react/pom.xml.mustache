@@ -1,0 +1,101 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>[@entityname@]-client-react</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>war</packaging>
+  
+  <properties>
+    <npm.output.directory>build</npm.output.directory>
+  </properties>
+
+  <parent>
+    <!-- Эти параметры должны в точности совпадать с аналогичными параметрами в родительском pom.xml -->
+    <groupId>com.technology.rfi.outofstaff</groupId>
+    <artifactId>[@entityname@]</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+
+  <build>
+    <finalName>${project.artifactId}</finalName>
+    <plugins>
+
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>client-react__clean</id>
+            <goals>
+              <goal>clean</goal>
+            </goals>
+            <phase>clean</phase>
+            <configuration>
+              <filesets>
+                <fileset>
+                  <directory>${npm.output.directory}</directory>
+                </fileset>
+              </filesets>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Standard plugin to generate WAR -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>2.1.1</version>
+        <configuration>
+          <webResources>
+            <resource>
+              <directory>${npm.output.directory}</directory>
+            </resource>
+          </webResources>
+          <webXml>${basedir}/web.xml</webXml>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.6.0</version>
+        <executions>
+
+          <execution>
+            <id>node-install-exec</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>yarn</executable>
+              <workingDirectory>${project.basedir}</workingDirectory>
+              <arguments>install</arguments>
+            </configuration>
+          </execution>
+    
+          <execution>
+            <id>node-build-exec</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>yarn</executable>
+              <workingDirectory>${project.basedir}</workingDirectory>
+              <arguments>
+                <argument>run</argument>
+                <argument>build</argument>
+              </arguments>
+            </configuration>
+          </execution>
+          
+        </executions>
+        
+      </plugin>
+
+    </plugins>
+  </build>
+
+</project>

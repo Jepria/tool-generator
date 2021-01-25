@@ -1,0 +1,23 @@
+import axios from "axios";
+import {API_PATH} from "../../../config";
+import {DirectionTypeOption} from "./[@EntityName@]Types";
+
+const API_URL = API_PATH;
+const withCredentials = false;
+
+export const getDirectionTypeOptions = (): Promise<DirectionTypeOption[]> => {
+  const url = `${API_URL}/[@entity_name_dash@]/option/direction-type`;
+  axios.defaults.withCredentials = withCredentials;
+
+  return axios
+    .get(url, {
+      headers: {
+        Accept: "application/json;charset=utf-8",
+        "Content-Type": "application/json;charset=utf-8",
+      },
+    })
+    .then((response) => response.data)
+    .catch((reason) => {
+      return Promise.reject(reason);
+    });
+};

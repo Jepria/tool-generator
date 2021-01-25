@@ -1,0 +1,156 @@
+import queryString from "query-string";
+import { ColumnSortConfiguration, SearchRequest } from "@jfront/core-rest";
+import {
+  SearchState,
+  createGenericSearchSlice,
+} from "./../../app/common/recordSearchSlice";
+import { AppThunk, RootState } from "./../../app/store";
+import { [@EntityName@], [@EntityName@]SearchTemplate } from "./api/[@EntityName@]Types";
+import { [@entityName@]SearchApi } from "./api/[@EntityName@]SearchApi";
+
+const initialState: SearchState<[@EntityName@], [@EntityName@]SearchTemplate> = {
+  searchTemplate: { maxRowCount: 250 },
+  error: null,
+  isLoading: false,
+  searchResult: [],
+  searchId: null,
+  pageSize: 25,
+  page: 1,
+  submit: false,
+  resultSetSize: null,
+};
+
+export const [@entityName@]SearchSlice = createGenericSearchSlice({
+  name: "[@entityName@]Search",
+  initialState: initialState,
+  reducers: {},
+});
+
+export const { setSearchTemplate } = [@entityName@]SearchSlice.actions;
+export const { searchError } = [@entityName@]SearchSlice.actions;
+export const { isLoading } = [@entityName@]SearchSlice.actions;
+export const { searchSuccess } = [@entityName@]SearchSlice.actions;
+export const { submitSearch } = [@entityName@]SearchSlice.actions;
+export const { setResultSetSize } = [@entityName@]SearchSlice.actions;
+export const { setSearchId } = [@entityName@]SearchSlice.actions;
+
+export const selectSearchResult = (state: RootState) =>
+  state.[@entityName@]Search.searchResult;
+export const selectError = (state: RootState) => state.[@entityName@]Search.error;
+export const selectIsLoading = (state: RootState) =>
+  state.[@entityName@]Search.isLoading;
+export const selectSearchTemplate = (state: RootState) =>
+  state.[@entityName@]Search.searchTemplate;
+export const selectSearchPageSize = (state: RootState) =>
+  state.[@entityName@]Search.pageSize;
+export const selectSearchPage = (state: RootState) => state.[@entityName@]Search.page;
+export const selectSearchSubmit = (state: RootState) =>
+  state.[@entityName@]Search.submit;
+export const selectResultSetSize = (state: RootState) =>
+  state.[@entityName@]Search.resultSetSize;
+export const selectSearchId = (state: RootState) => state.[@entityName@]Search.searchId;  
+
+/**
+ * Fetch records and update search result
+ * @param {string} searchRequestString template string from query
+ * @param {number} pageSize page size
+ * @param {number} page page index
+ */
+export const fetch[@EntityName@]SearchResultset = (
+  searchRequestString: string,
+  pageSize,
+  page,
+  listSortConfiguration?: Array<ColumnSortConfiguration>
+): AppThunk => async (dispatch) => {
+  try {
+    let searchTemplate = queryString.parse(searchRequestString);
+    if (searchTemplate.page) {
+      delete searchTemplate.page;
+    }
+    if (searchTemplate.pageSize) {
+      delete searchTemplate.pageSize;
+    }
+    let searchRequest: SearchRequest<[@EntityName@]SearchTemplate> = {
+      template: searchTemplate,
+      listSortConfiguration
+    };
+
+    dispatch(isLoading(true));
+    dispatch(setSearchTemplate(JSON.parse(JSON.stringify(searchTemplate))));
+    [@entityName@]SearchApi.postSearchRequest(searchRequest).then((searchId) => {
+      [@entityName@]SearchApi.getResultSetSize(searchId).then((resultSize) => {
+        dispatch(setResultSetSize(resultSize));
+        if (resultSize > 0) {
+          if (searchId) {
+            [@entityName@]SearchApi
+              .search(searchId, pageSize, page)
+              .then((records) => {
+                dispatch(searchSuccess(records));
+                dispatch(setSearchId(searchId));
+                dispatch(isLoading(false));
+              });
+          }
+        } else {
+          alert("Search empty!");
+          dispatch(isLoading(false));
+        }
+      });
+    });
+  } catch (err) {
+    dispatch(isLoading(false));
+    dispatch(setResultSetSize(0));
+    dispatch(searchError(err));
+  }
+};
+
+export const fetchSearch[@EntityName@]s = (searchId: string, pageSize: number, page: number) : AppThunk => async (dispatch) => {
+  try {
+    dispatch(isLoading(true));
+    [@entityName@]SearchApi.search(searchId, pageSize, page).then((records) => {
+      dispatch(searchSuccess(records));
+      dispatch(isLoading(false));
+    });
+  } catch (err) {
+    dispatch(isLoading(false));
+    dispatch(searchError(err));
+  }
+};
+
+export const postSearchFeatures  = (searchRequestString: string): AppThunk => async (dispatch) => {
+  try {
+    let searchTemplate = queryString.parse(searchRequestString);
+    if (searchTemplate.page) {
+      delete searchTemplate.page;
+    }
+    if (searchTemplate.pageSize) {
+      delete searchTemplate.pageSize;
+    }
+    let searchRequest: SearchRequest<[@EntityName@]SearchTemplate> = {
+      template: searchTemplate,
+    };
+
+    dispatch(isLoading(true));
+    dispatch(setSearchTemplate(JSON.parse(JSON.stringify(searchTemplate))));
+    [@entityName@]SearchApi.postSearchRequest(searchRequest).then((searchId) => {
+      [@entityName@]SearchApi.getResultSetSize(searchId).then((resultSize) => {
+        dispatch(setResultSetSize(resultSize));
+        if (resultSize > 0) {
+          if (searchId) {
+            dispatch(isLoading(false));
+            dispatch(setSearchId(searchId));
+          }
+        } else {
+          alert("Search empty!");
+          dispatch(isLoading(false));
+        }
+      });
+    });
+  } catch (err) {
+    dispatch(isLoading(false));
+    dispatch(setResultSetSize(0));
+    dispatch(searchError(err));
+  }
+}
+
+
+export default [@entityName@]SearchSlice.reducer;

@@ -1,0 +1,89 @@
+import React from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
+import { useHistory } from "react-router-dom";
+import {
+  Toolbar,
+  ToolbarButtonBase,
+  ToolbarButtonCreate,
+  ToolbarButtonDelete,
+  ToolbarButtonEdit,
+  ToolbarButtonFind,
+  ToolbarButtonSave,
+  ToolbarButtonView,
+  ToolbarSplitter,
+} from "@jfront/ui-core";
+import { select[@EntityName@], submitSaveOnCreate, submitSaveOnEdit } from "../[@entityName@]Slice";
+import {
+  selectSearchPage,
+  selectSearchPageSize,
+  selectSearchResult,
+  submitSearch,
+} from "../[@entityName@]SearchSlice";
+import { [@EntityName@] } from "../api/[@EntityName@]Types";
+import { Workstates, useWorkstate } from "../../../app/common/useWorkstate";
+
+const [@EntityName@]Toolbar = () => {
+  //----------------
+  const { t } = useTranslation();
+  const history = useHistory();
+  const dispatch = useDispatch();
+  //----------------
+  const currentRecord: [@EntityName@] = useSelector(select[@EntityName@]);
+  const records: Array<[@EntityName@]> = useSelector(selectSearchResult);
+  const searchPage: number = useSelector(selectSearchPage);
+  const searchPageSize: number = useSelector(selectSearchPageSize);
+  const state = useWorkstate(history.location.pathname);
+
+  return (
+    <Toolbar>
+      <ToolbarButtonCreate
+        disabled={state === Workstates.Detail}
+        onClick={() => history.push(`/[@entity_name_dash@]/create`)}
+      />
+      <ToolbarButtonSave
+        disabled={Workstates.Create !== state && Workstates.Edit !== state}
+        onClick={() => {
+          if (Workstates.Create === state) {
+            dispatch(submitSaveOnCreate());
+          } else if (Workstates.Edit == state) {
+            dispatch(submitSaveOnEdit());
+          }
+        }}
+      />
+      <ToolbarButtonEdit
+        disabled={!currentRecord}
+        onClick={() => {
+          history.push(`/[@entity_name_dash@]/${currentRecord?.[@entityId@]}/edit`);
+        }}
+      />
+      <ToolbarButtonDelete disabled />
+      <ToolbarButtonView
+        disabled={!currentRecord || Workstates.Detail === state}
+        onClick={() => history.push(`/[@entity_name_dash@]/${ currentRecord?.[@entityId@] }/detail`)}
+      />
+      <ToolbarSplitter />
+      <ToolbarButtonBase
+        disabled={Workstates.List !== state && records ? records.length === 0 : true}
+        onClick={() => history.push(`/[@entity_name_dash@]/list/?pageSize=${searchPageSize}&page=${searchPage}`)}
+      >
+        {t("toolbar.list")}
+      </ToolbarButtonBase>
+      <ToolbarButtonFind
+        disabled={state === Workstates.Search}
+        onClick={() => history.push(`/[@entity_name_dash@]`)}
+      />
+      <ToolbarButtonBase
+        disabled={state !== Workstates.Search}
+        type="submit"
+        onClick={() => {
+          dispatch(submitSearch(true));
+        }}
+      >
+        {t("toolbar.find")}
+      </ToolbarButtonBase>
+    </Toolbar>
+  );
+};
+
+export default [@EntityName@]Toolbar;

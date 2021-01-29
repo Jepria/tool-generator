@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import queryString from 'query-string';
 import { Grid } from "@jfront/ui-core";
 import { [@EntityName@] } from "../api/[@EntityName@]Types";
 import { postSearch, postSearchRequest, search } from "../state/[@EntityName@]SearchSlice";
@@ -15,8 +16,9 @@ const useQuery = () => {
 const [@EntityName@]ListPage = () => {
   //----------------
   const history = useHistory();
+  const { ...template } = queryString.parse(useLocation().search);
   const location = useLocation();
-  let query = useQuery();
+  const query = useQuery();
   const { t } = useTranslation();
   const dispatch = useDispatch();
   //----------------
@@ -57,7 +59,8 @@ const [@EntityName@]ListPage = () => {
         totalRowCount={resultSetSize}
         defaultPageSize={page.pageSize}
         defaultPageNumber={page.pageNumber}
-        onSelection={(records) => {
+        onSelection={
+          (records) => {
             if (records) {
               if (records.length === 1) {
                 if (records[0] !== currentRecord) {
@@ -69,10 +72,10 @@ const [@EntityName@]ListPage = () => {
               dispatch(crudActions.selectRecords({ selectedRecords: records }));
             }
           }
-          }}
-          onDoubleClick={(record: [@EntityName@]) => {
-            history.push(`/[@entity_name_dash@]/${record.[@entityId@]}/detail`);
-          }}
+        }}
+        onDoubleClick={(record: [@EntityName@]) => {
+          history.push(`/[@entity_name_dash@]/${record.[@entityId@]}/detail`);
+        }}
         onPaging={(pageNumber, pageSize) => {
           setPage({
             pageNumber: pageNumber,
@@ -83,8 +86,7 @@ const [@EntityName@]ListPage = () => {
           const newSearchRequest = {
             template: {
               maxRowCount: 25,
-              ...query,
-              ...searchRequest?.template,
+              ...template,
             },
             listSortConfiguration: sortConfig,
           };

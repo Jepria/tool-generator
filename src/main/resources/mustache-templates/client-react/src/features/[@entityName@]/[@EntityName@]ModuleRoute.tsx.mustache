@@ -10,13 +10,13 @@ function [@EntityName@]ModuleRoute() {
   const { t } = useTranslation();
   const { path } = useRouteMatch();
   const { isRoleLoading, isUserInRoles } = useContext(UserContext);
-  const [hasAccess, setHasAccess] = useState(false);
+  const [hasAccess, setHasAccess] = useState(true);
 
-  useEffect(() => {
+  /*useEffect(() => {
     isUserInRoles(["JrsEdit[@EntityName@]", "JrsEditAll[@EntityName@]", "JrsAssignResponsible[@EntityName@]"])
       .then(setHasAccess)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, []); */
 
   return (
     <>

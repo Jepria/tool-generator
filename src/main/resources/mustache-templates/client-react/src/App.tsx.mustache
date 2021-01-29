@@ -1,10 +1,10 @@
 import React, {Suspense, useContext, useEffect} from "react";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import [@EntityName@]Route from "./features/[@entityName@]/[@EntityName@]Route";
-import { UserPanel } from '@jfront/oauth-ui';
+import [@EntityName@]ModuleRoute from "./features/[@entityName@]/[@EntityName@]ModuleRoute";
+import { UserPanel } from "@jfront/oauth-ui";
 import { UserContext } from "@jfront/oauth-user";
-import { Loader } from '@jfront/oauth-ui'
+import { Loader } from "@jfront/oauth-ui";
 
 function Main() {
   const { i18n, t } = useTranslation();
@@ -23,7 +23,7 @@ function Main() {
         <BrowserRouter basename={`${process.env.PUBLIC_URL}`}>
           <Switch>
             <Route path="/[@entity_name_dash@]">
-              <[@EntityName@]Route />
+              <[@EntityName@]ModuleRoute />
             </Route>
           </Switch>
         </BrowserRouter>}

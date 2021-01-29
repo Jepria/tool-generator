@@ -1,13 +1,22 @@
-import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
-import [@entityName@]Reducer from "../features/[@entityName@]/[@entityName@]Slice";
-import [@entityName@]SearchReducer from "../features/[@entityName@]/[@entityName@]SearchSlice";
+import { useDispatch } from "react-redux";
+import { Action, configureStore, getDefaultMiddleware, ThunkAction } from "@reduxjs/toolkit";
+import logger from "redux-logger";
+import {
+  initialState as [@entityName@]InitialState,
+  [@entityName@]Reducer,
+} from "../features/[@entityName@]/state/[@EntityName@]Reducer";
 
 export const store = configureStore({
   reducer: {
     [@entityName@]: [@entityName@]Reducer,
-    [@entityName@]Search: [@entityName@]SearchReducer,
   },
+  middleware: [...getDefaultMiddleware().concat(logger)],
+  preloadedState: [@entityName@]InitialState,
+  devTools: process.env.NODE_ENV === "development",
 });
+
+export type AppDispatch = typeof store.dispatch;
+export const useAppDispatch = () => useDispatch<AppDispatch>();
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppThunk = ThunkAction<void, RootState, unknown, Action<string>>;

@@ -1,11 +1,12 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Grid } from "@jfront/ui-core";
 import { [@EntityName@] } from "../api/[@EntityName@]Types";
-import { setCurrentRecord } from "../[@entityName@]Slice";
-import { selectSearchResult, fetch[@EntityName@]SearchResultset, selectIsLoading, selectResultSetSize, selectSearchId, fetchSearch[@EntityName@]s } from "../[@entityName@]SearchSlice";
+import { postSearch, postSearchRequest, search } from "../state/[@EntityName@]SearchSlice";
+import { actions as crudActions } from "../state/[@EntityName@]Slice";
+import { RootState } from "../../../app/store";
 
 const useQuery = () => {
   return new URLSearchParams(useLocation().search);
@@ -20,66 +21,78 @@ const [@EntityName@]ListPage = () => {
   const dispatch = useDispatch();
   //----------------
 
-  const pageSize: number = parseInt(query.get("pageSize") as string);
-  const page: number = parseInt(query.get("page") as string);
-  const records: Array<[@EntityName@]> = useSelector(selectSearchResult);
-  const isLoading = useSelector(selectIsLoading);
-  const resultSetSize = useSelector(selectResultSetSize);
-  const searchId = useSelector(selectSearchId);
+  const [page, setPage] = useState({
+    pageSize: parseInt(query.get("pageSize") as string),
+    pageNumber: parseInt(query.get("page") as string),
+  });
+
+  const { currentRecord } = useSelector((state: RootState) => state.[@entityName@].[@entityName@]CrudSlice);
+  const { records, searchId, searchRequest, isLoading, resultSetSize } = useSelector(
+    (state: RootState) => state.[@entityName@].[@entityName@]SearchSlice
+  );
 
   useEffect(() => {
-    dispatch(fetch[@EntityName@]SearchResultset(location.search, pageSize, page));
-  }, [location]);
+    if (searchId) {
+      dispatch(
+        search({ searchId: searchId, pageSize: page.pageSize, pageNumber: page.pageNumber })
+      );
+    }
+  }, [searchId, page, dispatch]);
 
   return (
     <>
-        <Grid
-          id="table"
-          columns={[
-            [@#fieldsList@]
-            {
-              Header: t("[@entityName@].fields.[@fieldName@]"),
-              [@#isTypeOption@]id: "[@fieldName@]",[@/isTypeOption@]
-              accessor: "[@fieldName@][@#isTypeOption@].name[@/isTypeOption@]",
-            },
-            [@/fieldsList@]
-          ]}
-          isLoading={isLoading}
-          data={records}
-          totalRowCount={resultSetSize}
-          onSelection={(selectedRecords) => {
-            if (selectedRecords.length === 1) {
-              dispatch(setCurrentRecord(selectedRecords[0]));
-            } else {
-              dispatch(setCurrentRecord(undefined));
+      <Grid
+        id="table"
+        columns={[
+          [@#fieldsList@]
+          {
+            Header: t("[@entityName@].fields.[@fieldName@]"),
+            [@#isTypeOption@]id: "[@fieldName@]",[@/isTypeOption@]
+            accessor: "[@fieldName@][@#isTypeOption@].name[@/isTypeOption@]",
+          },
+          [@/fieldsList@]
+        ]}
+        isLoading={isLoading}
+        data={records}
+        totalRowCount={resultSetSize}
+        defaultPageSize={page.pageSize}
+        defaultPageNumber={page.pageNumber}
+        onSelection={(records) => {
+            if (records) {
+              if (records.length === 1) {
+                if (records[0] !== currentRecord) {
+                  dispatch(crudActions.setCurrentRecord({ currentRecord: records[0] }));
+                  dispatch(crudActions.selectRecords({ selectedRecords: records }));
+                }
+            } else if (currentRecord) {
+              dispatch(crudActions.setCurrentRecord({} as any));
+              dispatch(crudActions.selectRecords({ selectedRecords: records }));
             }
+          }
           }}
-          onDoubleClick={(record) => {
+          onDoubleClick={(record: [@EntityName@]) => {
             history.push(`/[@entity_name_dash@]/${record.[@entityId@]}/detail`);
           }}
-          onPaging={(pageNumber, pageSize) => {
-            if (searchId) {
-              console.log(`pageNumber = ${pageNumber}, pageSize = ${pageSize}`)
-              dispatch(fetchSearch[@EntityName@]s(searchId, pageSize, pageNumber));
-            }
-          }}
-          onSort={(sortConfig) => {
-
-            dispatch(fetch[@EntityName@]SearchResultset(location.search, pageSize, page, sortConfig));
-            // if (searchRequest) {
-            //   const newSearchRequest = {
-            //     ...searchRequest,
-            //     listSortConfiguration: sortConfig
-            //   }
-            //   dispatch(postSearchClientRequest(newSearchRequest, t("dataLoadingMessage")));
-            // } else {
-            //   if (pageSize && page) {
-            //     dispatch(postSearchClientRequest({ template: searchTemplate as unknown as ClientSearchTemplate, listSortConfiguration: sortConfig }, t("dataLoadingMessage")));
-            //   } else {
-            //     dispatch(postSearchClientRequest({ template: { maxRowCount: 25 }, listSortConfiguration: sortConfig }, t("dataLoadingMessage")));
-            //   }
-            // }
-
+        onPaging={(pageNumber, pageSize) => {
+          setPage({
+            pageNumber: pageNumber,
+            pageSize: pageSize,
+          });
+        }}
+        onSort={(sortConfig) => {
+          const newSearchRequest = {
+            template: {
+              maxRowCount: 25,
+              ...query,
+              ...searchRequest?.template,
+            },
+            listSortConfiguration: sortConfig,
+          };
+          dispatch(
+            postSearchRequest({
+              searchTemplate: newSearchRequest,
+            })
+          );
           }}
         />
     </>

@@ -1,10 +1,10 @@
-import React, {useEffect} from "react";
-import {useParams} from "react-router-dom";
-import {useTranslation} from "react-i18next";
-import {useDispatch, useSelector} from "react-redux";
-import {Form} from "@jfront/ui-core";
-import {[@EntityName@]} from "../api/[@EntityName@]Types";
-import {fetch[@EntityName@], select[@EntityName@], selectError} from "../[@entityName@]Slice";
+import React, { useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useDispatch, useSelector } from "react-redux";
+import { Form } from "@jfront/ui-core";
+import { getRecordById } from "../state/[@EntityName@]Slice";
+import { RootState } from "../../../app/store";
 
 const [@EntityName@]DetailPage = () => {
   //----------------
@@ -13,16 +13,17 @@ const [@EntityName@]DetailPage = () => {
   //----------------
 
   let { [@entityId@]: [@entityId@] } = useParams();
-  const currentRecord: [@EntityName@] = useSelector(select[@EntityName@]);
-  const error = useSelector(selectError);
+  const { currentRecord, error } = useSelector(
+    (state: RootState) => state.[@entityName@].[@entityName@]CrudSlice
+  );
 
   useEffect(() => {
-    dispatch(fetch[@EntityName@]([@entityId@]));
+    dispatch(getRecordById({ primaryKey: [@entityId@] }));
   }, []);
 
   return (
     <>
-      {error ? <div>{error}</div> : null}
+      {error ? <div>{error.message}</div> : null}
       <Form>
         
         [@#fieldsDetail@]

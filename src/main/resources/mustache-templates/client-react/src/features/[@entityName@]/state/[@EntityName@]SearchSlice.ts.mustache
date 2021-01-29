@@ -1,0 +1,28 @@
+import { createSearchSlice, SearchState } from "@jfront/core-redux-thunk";
+import { [@EntityName@], [@EntityName@]SearchTemplate } from "../api/[@EntityName@]Types";
+import { [@entityName@]SearchApi } from "../api/[@EntityName@]SearchApi";
+
+export const initialSearchState: SearchState<[@EntityName@]SearchTemplate, [@EntityName@]> = {
+  searchRequest: { template: { maxRowCount: 250 } },
+  error: null,
+  isLoading: false,
+  records: [],
+  searchId: null,
+  pageSize: 25,
+  pageNumber: 1,
+  resultSetSize: null,
+};
+
+export const slice = createSearchSlice({
+  name: "[@entityName@]Search",
+  initialState: initialSearchState,
+  reducers: {},
+});
+
+const thunkCreators = slice.thunk;
+
+export const search = thunkCreators.searchThunk([@entityName@]SearchApi);
+export const postSearch = thunkCreators.postSearchThunk([@entityName@]SearchApi);
+export const postSearchRequest = thunkCreators.postSearchRequestThunk([@entityName@]SearchApi);
+
+export const { name, actions, reducer } = slice;

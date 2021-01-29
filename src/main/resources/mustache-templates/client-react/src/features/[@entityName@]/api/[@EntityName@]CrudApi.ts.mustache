@@ -1,12 +1,17 @@
+import axios, { AxiosInstance } from "axios";
 import {ConnectorCrud} from "@jfront/core-rest";
 import {API_PATH} from "../../../config";
 import {[@EntityName@], [@EntityName@]Create, [@EntityName@]Update} from "./[@EntityName@]Types";
-import axios from 'axios'
 
-class [@EntityName@]CrudApi extends ConnectorCrud<[@EntityName@], [@EntityName@]Create, [@EntityName@]Update> {
-  constructor(baseUrl: string) {
-    super(baseUrl, false, axios);
+
+class [@EntityName@]CrudApi extends ConnectorCrud<[@EntityName@], string, [@EntityName@]Create, [@EntityName@]Update> {
+  constructor(
+    baseUrl: string,
+    withCrudentials = false,
+    axiosInstance?: AxiosInstance
+  ) {
+    super(baseUrl, withCrudentials, axiosInstance);
   }
 }
 
-export const [@entityName@]CrudApi = new [@EntityName@]CrudApi(API_PATH + "/[@entity_name_dash@]");
+export const [@entityName@]CrudApi = new [@EntityName@]CrudApi(API_PATH + "/[@entity_name_dash@]", false, axios);

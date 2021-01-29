@@ -1,7 +1,7 @@
 import React from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import {
   Toolbar,
   ToolbarButtonBase,
@@ -13,26 +13,25 @@ import {
   ToolbarButtonView,
   ToolbarSplitter,
 } from "@jfront/ui-core";
-import { select[@EntityName@], submitSaveOnCreate, submitSaveOnEdit } from "../[@entityName@]Slice";
-import {
-  selectSearchPage,
-  selectSearchPageSize,
-  selectSearchResult,
-  submitSearch,
-} from "../[@entityName@]SearchSlice";
 import { [@EntityName@] } from "../api/[@EntityName@]Types";
 import { Workstates, useWorkstate } from "../../../app/common/useWorkstate";
+import { deleteRecord } from "../state/[@EntityName@]Slice";
+import { RootState, useAppDispatch } from "../../../app/store";
+import { search } from "../state/[@EntityName@]SearchSlice";
 
-const [@EntityName@]Toolbar = () => {
+
+const [@EntityName@]Toolbar = ({ formRef }) => {
   //----------------
   const { t } = useTranslation();
   const history = useHistory();
-  const dispatch = useDispatch();
+  const { pathname } = useLocation();
+  const dispatch = useAppDispatch();
   //----------------
-  const currentRecord: [@EntityName@] = useSelector(select[@EntityName@]);
-  const records: Array<[@EntityName@]> = useSelector(selectSearchResult);
-  const searchPage: number = useSelector(selectSearchPage);
-  const searchPageSize: number = useSelector(selectSearchPageSize);
+
+  const { records, searchId, pageSize, pageNumber, } = useSelector((state: RootState) => state.[@entityName@].[@entityName@]SearchSlice);
+  const { currentRecord, selectedRecords } = useSelector(
+    (state: RootState) => state.[@entityName@].[@entityName@]CrudSlice
+  );
   const state = useWorkstate(history.location.pathname);
 
   return (
@@ -44,11 +43,7 @@ const [@EntityName@]Toolbar = () => {
       <ToolbarButtonSave
         disabled={Workstates.Create !== state && Workstates.Edit !== state}
         onClick={() => {
-          if (Workstates.Create === state) {
-            dispatch(submitSaveOnCreate());
-          } else if (Workstates.Edit == state) {
-            dispatch(submitSaveOnEdit());
-          }
+          formRef.current?.dispatchEvent(new Event("submit"));
         }}
       />
       <ToolbarButtonEdit
@@ -57,7 +52,22 @@ const [@EntityName@]Toolbar = () => {
           history.push(`/[@entity_name_dash@]/${currentRecord?.[@entityId@]}/edit`);
         }}
       />
-      <ToolbarButtonDelete disabled />
+      <ToolbarButtonDelete
+        disabled={!currentRecord}
+        onClick={() => {
+          dispatch(
+            deleteRecord({
+              primaryKeys: selectedRecords.map((selectRecord: [@EntityName@]) => selectRecord.[@entityId@]),
+            })
+          ).then(() => {
+            if (pathname.endsWith("/list") && searchId) {
+              dispatch(search({ searchId, pageSize: pageSize, pageNumber: pageNumber }));
+            } else {
+              history.push(`/[@entity_name_dash@]/list?pageSize=${pageSize}&page=${pageNumber}`);
+            }
+          });
+        }}
+      />
       <ToolbarButtonView
         disabled={!currentRecord || Workstates.Detail === state}
         onClick={() => history.push(`/[@entity_name_dash@]/${ currentRecord?.[@entityId@] }/detail`)}
@@ -65,7 +75,7 @@ const [@EntityName@]Toolbar = () => {
       <ToolbarSplitter />
       <ToolbarButtonBase
         disabled={Workstates.List !== state && records ? records.length === 0 : true}
-        onClick={() => history.push(`/[@entity_name_dash@]/list/?pageSize=${searchPageSize}&page=${searchPage}`)}
+        onClick={() => history.push(`/[@entity_name_dash@]/list/?pageSize=${pageSize}&page=${pageNumber}`)}
       >
         {t("toolbar.list")}
       </ToolbarButtonBase>
@@ -77,7 +87,7 @@ const [@EntityName@]Toolbar = () => {
         disabled={state !== Workstates.Search}
         type="submit"
         onClick={() => {
-          dispatch(submitSearch(true));
+          formRef.current?.dispatchEvent(new Event("submit"));
         }}
       >
         {t("toolbar.find")}

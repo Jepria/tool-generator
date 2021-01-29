@@ -3,9 +3,10 @@ import { useHistory, useParams } from "react-router-dom";
 import { useFormik } from "formik";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
+import queryString from "query-string";
 import { ComboBox, ComboBoxItem, Form, DatePicker, NumberInput, TextInput } from "@jfront/ui-core";
 import { RootState } from "../../../app/store";
-import { getRecordById } from "../state/[@EntityName@]Slice";
+import { getRecordById } from "../state/[@EntityName@]CrudSlice";
 import {
   [@#fieldsEdit@]
   [@#isTypeOption@][@FieldName@]Option,[@/isTypeOption@]
@@ -17,7 +18,6 @@ import {
   [@#isTypeOption@]get[@FieldName@]Options,[@/isTypeOption@]
   [@/fieldsEdit@]
 } from "../api/[@EntityName@]Api";
-import queryString from "query-string";
 
 const [@EntityName@]EditPage = ({ formRef }) => {
   //----------------

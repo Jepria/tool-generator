@@ -15,10 +15,9 @@ import {
 } from "@jfront/ui-core";
 import { [@EntityName@] } from "../api/[@EntityName@]Types";
 import { Workstates, useWorkstate } from "../../../app/common/useWorkstate";
-import { deleteRecord } from "../state/[@EntityName@]Slice";
-import { RootState, useAppDispatch } from "../../../app/store";
+import { deleteRecord } from "../state/[@EntityName@]CrudSlice";
 import { search } from "../state/[@EntityName@]SearchSlice";
-
+import { RootState, useAppDispatch } from "../../../app/store";
 
 const [@EntityName@]Toolbar = ({ formRef }) => {
   //----------------

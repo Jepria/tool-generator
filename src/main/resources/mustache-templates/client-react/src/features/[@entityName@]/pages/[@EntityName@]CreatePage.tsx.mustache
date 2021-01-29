@@ -2,19 +2,19 @@ import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import { useFormik } from "formik";
 import { useTranslation } from "react-i18next";
+import queryString from "query-string";
 import { ComboBox, ComboBoxItem, Form, DatePicker, NumberInput, TextInput} from "@jfront/ui-core";
 import {
   [@#fieldsCreate@]
   [@#isTypeOption@][@FieldName@]Option,[@/isTypeOption@]
   [@/fieldsCreate@]
-  [@EntityName@], [@EntityName@]Create} from "../api/[@EntityName@]Types";
-import {[@entityName@]CrudApi} from "../api/[@EntityName@]CrudApi";
+  [@EntityName@], [@EntityName@]Create } from "../api/[@EntityName@]Types";
+import { [@entityName@]CrudApi } from "../api/[@EntityName@]CrudApi";
 import {
   [@#fieldsCreate@]
   [@#isTypeOption@]get[@FieldName@]Options,[@/isTypeOption@]
   [@/fieldsCreate@]
 } from "../api/[@EntityName@]Api";
-import queryString from "query-string";
 
 const [@EntityName@]CreatePage = ({ formRef }) => {
   //----------------

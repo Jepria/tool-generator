@@ -1,8 +1,7 @@
 import axios, { AxiosInstance } from "axios";
-import {ConnectorCrud} from "@jfront/core-rest";
-import {API_PATH} from "../../../config";
-import {[@EntityName@], [@EntityName@]Create, [@EntityName@]Update} from "./[@EntityName@]Types";
-
+import { ConnectorCrud } from "@jfront/core-rest";
+import { API_PATH } from "../../../config";
+import { [@EntityName@], [@EntityName@]Create, [@EntityName@]Update } from "./[@EntityName@]Types";
 
 class [@EntityName@]CrudApi extends ConnectorCrud<[@EntityName@], string, [@EntityName@]Create, [@EntityName@]Update> {
   constructor(

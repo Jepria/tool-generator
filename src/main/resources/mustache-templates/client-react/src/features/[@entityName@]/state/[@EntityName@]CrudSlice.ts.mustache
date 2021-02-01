@@ -1,0 +1,25 @@
+import { createCrudSlice, EntityState } from "@jfront/core-redux-thunk";
+import { [@EntityName@] } from "../api/[@EntityName@]Types";
+import { [@entityName@]CrudApi } from "../api/[@EntityName@]CrudApi";
+
+export const initialEntityState: EntityState<[@EntityName@]> = {
+  currentRecord: null,
+  error: null,
+  isLoading: false,
+  selectedRecords: [],
+};
+
+const entitySlice = createCrudSlice({
+  name: "[@entityName@]Slice",
+  initialState: initialEntityState,
+  reducers: {},
+});
+
+const thunkCreators = entitySlice.thunk;
+
+export const getRecordById = thunkCreators.getRecordByIdThunk([@entityName@]CrudApi);
+export const createRecord = thunkCreators.createThunk([@entityName@]CrudApi);
+export const updateRecord = thunkCreators.updateThunk([@entityName@]CrudApi);
+export const deleteRecord = thunkCreators.deleteThunk([@entityName@]CrudApi);
+
+export const { name, actions, reducer } = entitySlice;

@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
-import {useHistory} from "react-router-dom";
-import {useFormik} from "formik";
-import {useTranslation} from "react-i18next";
-import {useDispatch, useSelector} from "react-redux";
-import {ComboBox, ComboBoxItem, Form, DatePicker, NumberInput, TextInput} from "@jfront/ui-core";
+import { useHistory } from "react-router-dom";
+import { useFormik } from "formik";
+import { useTranslation } from "react-i18next";
+import { useDispatch, useSelector } from "react-redux";
+import queryString from "query-string";
+import { ComboBox, ComboBoxItem, Form, DatePicker, NumberInput, TextInput } from "@jfront/ui-core";
 import {
   [@#fieldsSearch@]
   [@#isTypeOption@][@FieldName@]Option,[@/isTypeOption@]
@@ -14,30 +15,22 @@ import {
   [@#isTypeOption@]get[@FieldName@]Options,[@/isTypeOption@]
   [@/fieldsSearch@]
 } from "../api/[@EntityName@]Api";
-import {selectSearchSubmit, selectSearchTemplate, submitSearch} from "../[@entityName@]SearchSlice";
-import queryString from "query-string";
+import { [@EntityName@]State } from "../state/[@EntityName@]Reducer";
 
-const [@EntityName@]SearchPage = () => {
+
+const [@EntityName@]SearchPage = ({ formRef }) => {
   //----------------
-  let formRef = useRef(null) as any;
   const { t } = useTranslation();
   const history = useHistory();
-  const dispatch = useDispatch();
   //----------------
 
   [@#fieldsSearch@]
   [@#isTypeOption@]const [[@fieldName@]Options, set[@FieldName@]Options] = useState<[@FieldName@]Option[]>();[@/isTypeOption@]
   [@/fieldsSearch@]
   
-  const selectSearch = useSelector(selectSearchSubmit);
-  const searchTemplate: [@EntityName@]SearchTemplate = useSelector(selectSearchTemplate);
-
-  useEffect(() => {
-    if (selectSearch) {
-      formRef.current?.dispatchEvent(new Event("submit"));
-      dispatch(submitSearch(false));
-    }
-  }, [selectSearch]);
+  const { searchRequest, isLoading } = useSelector(
+    (state: [@EntityName@]State) => state.[@entityName@].[@entityName@]SearchSlice
+  );
 
   [@#fieldsSearch@]
   [@#isTypeOption@]
@@ -50,7 +43,7 @@ const [@EntityName@]SearchPage = () => {
   [@/fieldsSearch@]
 
   const formik = useFormik<[@EntityName@]SearchTemplate>({
-    initialValues: searchTemplate,
+    initialValues: searchRequest.template,
     enableReinitialize: true,
     onSubmit: (values) => {
       let query = queryString.stringify(values);

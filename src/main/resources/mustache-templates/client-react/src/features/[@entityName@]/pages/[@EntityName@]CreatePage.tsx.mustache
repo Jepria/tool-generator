@@ -1,43 +1,31 @@
-import React, { useEffect, useRef, useState } from "react";
-import {useHistory} from "react-router-dom";
-import {useFormik} from "formik";
-import {useTranslation} from "react-i18next";
-import {useDispatch, useSelector} from "react-redux";
-import {ComboBox, ComboBoxItem, Form, DatePicker, NumberInput, TextInput} from "@jfront/ui-core";
+import React, { useState, useEffect } from "react";
+import { useHistory } from "react-router-dom";
+import { useFormik } from "formik";
+import { useTranslation } from "react-i18next";
+import queryString from "query-string";
+import { ComboBox, ComboBoxItem, Form, DatePicker, NumberInput, TextInput} from "@jfront/ui-core";
 import {
   [@#fieldsCreate@]
   [@#isTypeOption@][@FieldName@]Option,[@/isTypeOption@]
   [@/fieldsCreate@]
-  [@EntityName@], [@EntityName@]Create} from "../api/[@EntityName@]Types";
-import {selectSaveOnCreate[@EntityName@], submitSaveOnCreate} from "../[@entityName@]Slice";
-import {[@entityName@]CrudApi} from "../api/[@EntityName@]CrudApi";
+  [@EntityName@], [@EntityName@]Create } from "../api/[@EntityName@]Types";
+import { [@entityName@]CrudApi } from "../api/[@EntityName@]CrudApi";
 import {
   [@#fieldsCreate@]
   [@#isTypeOption@]get[@FieldName@]Options,[@/isTypeOption@]
   [@/fieldsCreate@]
 } from "../api/[@EntityName@]Api";
-import queryString from "query-string";
 
-const [@EntityName@]CreatePage = () => {
+const [@EntityName@]CreatePage = ({ formRef }) => {
   //----------------
-  let formRef = useRef(null) as any;
   const { t } = useTranslation();
   const history = useHistory();
-  const dispatch = useDispatch();
   //----------------
 
   [@#fieldsCreate@]
   [@#isTypeOption@]const [[@fieldName@]Options, set[@FieldName@]Options] = useState<[@FieldName@]Option[]>();[@/isTypeOption@]
   [@/fieldsCreate@]
   
-  const onCreate[@EntityName@] = useSelector(selectSaveOnCreate[@EntityName@]);
-  useEffect(() => {
-    if (onCreate[@EntityName@]) {
-      dispatch(submitSaveOnCreate());
-      formRef.current?.dispatchEvent(new Event("submit"));
-    }
-  }, [onCreate[@EntityName@]]);
-
   [@#fieldsCreate@]
   [@#isTypeOption@]
   useEffect(() => {

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { useSelector } from "react-redux";
 import { Route, useRouteMatch, useHistory, useParams } from "react-router-dom";
 import [@EntityName@]DetailPage from "./pages/[@EntityName@]DetailPage";
@@ -9,14 +9,14 @@ import [@EntityName@]EditPage from "./pages/[@EntityName@]EditPage";
 import [@EntityName@]Toolbar from "./components/[@EntityName@]Toolbar";
 import { Panel, Tab, TabPanel } from "@jfront/ui-core";
 import { useTranslation } from "react-i18next";
-import { select[@EntityName@] } from "./[@entityName@]Slice";
-import { [@EntityName@] } from "./api/[@EntityName@]Types";
+import { RootState } from "../../app/store";
 
 function [@EntityName@]Route() {
   const { path } = useRouteMatch();
   const history = useHistory();
   const { t } = useTranslation();
-  const current[@EntityName@]: [@EntityName@] = useSelector(select[@EntityName@]);
+  const { currentRecord } = useSelector((state: RootState) => state.[@entityName@].[@entityName@]CrudSlice);
+  const formRef = useRef<HTMLFormElement>(null);
 
   return (
     <Panel>
@@ -25,23 +25,23 @@ function [@EntityName@]Route() {
           <Tab
             selected={true}
             onClick={() => {
-              history.push(`/[@entity_name_dash@]/${current[@EntityName@]?.[@entityId@]}/detail`);
+              history.push(`/[@entity_name_dash@]/${currentRecord?.[@entityId@]}/detail`);
             }}
           >
             {t("[@entityName@].header")}
           </Tab>
         </TabPanel>
-        <[@EntityName@]Toolbar />
+        <[@EntityName@]Toolbar formRef={formRef}/>
       </Panel.Header>
       <Panel.Content>
         <Route path={`${path}`} exact>
-          <[@EntityName@]SearchPage />
+          <[@EntityName@]SearchPage formRef={formRef} />
         </Route>
         <Route path={`${path}/create`} exact>
-          <[@EntityName@]CreatePage />
+          <[@EntityName@]CreatePage formRef={formRef} />
         </Route>
         <Route path={`${path}/:[@entityId@]/edit`} exact>
-          <[@EntityName@]EditPage />
+          <[@EntityName@]EditPage formRef={formRef} />
         </Route>
         <Route path={`${path}/:[@entityId@]/detail`}>
           <[@EntityName@]DetailPage />

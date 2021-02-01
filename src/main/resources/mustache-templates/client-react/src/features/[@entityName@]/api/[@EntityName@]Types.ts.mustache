@@ -1,35 +1,79 @@
 //TODO interface to type?
 export interface [@EntityName@] {
   [@entityId@]: number;
-  directionType: {
+  [@#fieldsDetail@]
+  [@#isTypeOption@]
+  [@fieldName@]: {
     name: string;
     value: string;
   };
-  documentMarkName: string;
-  beginDate: Date;
-  endDate: Date;
+  [@/isTypeOption@]
+  [@#isTypeInt@]
+  [@fieldName@]: number;
+  [@/isTypeInt@]
+  [@#isTypeText@]
+  [@fieldName@]: string;
+  [@/isTypeText@]
+  [@#isTypeDate@]
+  [@fieldName@]: Date;
+  [@/isTypeDate@]
+  [@/fieldsDetail@]
 }
 
 export interface [@EntityName@]Create {
-  directionTypeCode: string;
-  documentMarkName: string;
-  beginDate: Date;
+  [@#fieldsCreate@]
+  [@#isTypeOption@]
+  [@fieldName@]Code: string;
+  [@/isTypeOption@]
+  [@#isTypeInt@]
+  [@fieldName@]: number;
+  [@/isTypeInt@]
+  [@#isTypeText@]
+  [@fieldName@]: string;
+  [@/isTypeText@]
+  [@#isTypeDate@]
+  [@fieldName@]: Date;
+  [@/isTypeDate@]
+  [@/fieldsCreate@]
 }
 
 export interface [@EntityName@]Update {
-  directionTypeCode: string;
-  documentMarkName: string;
-  beginDate: Date;
-  endDate: Date;
+  [@#fieldsEdit@]
+  [@#isTypeOption@]
+  [@fieldName@]Code: string;
+  [@/isTypeOption@]
+  [@#isTypeInt@]
+  [@fieldName@]: number;
+  [@/isTypeInt@]
+  [@#isTypeText@]
+  [@fieldName@]: string;
+  [@/isTypeText@]
+  [@#isTypeDate@]
+  [@fieldName@]: Date;
+  [@/isTypeDate@]
+  [@/fieldsEdit@]
 }
 
 export interface [@EntityName@]SearchTemplate { // в поисковом dto везде ставим вопросики
-  directionTypeCode?: string;
-  documentMarkName?: string;
-  maxRowCount?: number;
+  [@#fieldsSearch@]
+  [@#isTypeOption@]
+  [@fieldName@]Code?: string;
+  [@/isTypeOption@]
+  [@#isTypeInt@]
+  [@fieldName@]?: number;
+  [@/isTypeInt@]
+  [@#isTypeText@]
+  [@fieldName@]?: string;
+  [@/isTypeText@]
+  [@#isTypeDate@]
+  [@fieldName@]?: Date;
+  [@/isTypeDate@]
+  [@/fieldsSearch@]
 }
 
-export interface DirectionTypeOption {
+[@#allOptions@]
+export interface [@FieldName@]Option {
   name: string;
   value: string;
 }
+[@/allOptions@]

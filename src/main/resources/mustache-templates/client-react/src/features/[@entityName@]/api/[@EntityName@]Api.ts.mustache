@@ -1,12 +1,17 @@
 import axios from "axios";
 import {API_PATH} from "../../../config";
-import {DirectionTypeOption} from "./[@EntityName@]Types";
+import {
+  [@#allOptions@]
+  [@FieldName@]Option,
+  [@/allOptions@]
+} from "./[@EntityName@]Types";
 
 const API_URL = API_PATH;
 const withCredentials = false;
 
-export const getDirectionTypeOptions = (): Promise<DirectionTypeOption[]> => {
-  const url = `${API_URL}/[@entity_name_dash@]/option/direction-type`;
+[@#allOptions@]
+export const get[@FieldName@]Options = (): Promise<[@FieldName@]Option[]> => {
+  const url = `${API_URL}/[@entity_name_dash@]/option/[@field_name_dash@]`;
   axios.defaults.withCredentials = withCredentials;
 
   return axios
@@ -21,3 +26,4 @@ export const getDirectionTypeOptions = (): Promise<DirectionTypeOption[]> => {
       return Promise.reject(reason);
     });
 };
+[@/allOptions@]

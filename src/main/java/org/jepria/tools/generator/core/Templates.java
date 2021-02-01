@@ -1,30 +1,10 @@
 package org.jepria.tools.generator.core;
 
-import org.jepria.tools.generator.core.parser.ApiSpecMethodExtractorJson;
 import org.jepria.tools.generator.core.parser.SpecMethod;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-public class Main {
-
-  enum FieldType {
-    INTEGER, STRING, DATE, OPTION
-  }
-
-  protected static String capitalize(String s) {
-    if (s == null) {
-      return null;
-    } else {
-      return Character.toUpperCase(s.charAt(0)) + s.substring(1);
-    }
-  }
+public class Templates {
 
   protected static Map<String, Object> createField(String fieldName, FieldType fieldType) {
     Map<String, Object> field = new HashMap<>();
@@ -36,28 +16,16 @@ public class Main {
     } else if (fieldType == FieldType.STRING) {
       field.put("isTypeText", true);
     } else if (fieldType == FieldType.OPTION) {
+      String FieldName = capitalize(fieldName);
+      field.put("FieldName", FieldName);
       field.put("isTypeOption", true);
     }
     return field;
   }
-
-
-  public static void main(String[] args) throws IOException {
-
-    ////////////////////////////
-    final File apiSpec = new File("C:/work/rfi/DocumentMark/App/service-rest/src/api-spec/document-mark/swagger.json");
-
-    final String entityName = "documentMark";
-    final String entityId = "documentMarkId";
-    final String EntityName = "DocumentMark";
-    final String entity_name_dash = "document-mark";
-    final String entityname = "documentmark";
-
-    final File templateRoot = new File("C:/work/tool-generator-crud/src/main/resources/mustache-templates/client-react");
-    final File outputRoot = new File("C:/work/rfi/DocumentMark/App");
-    final File partialsRoot = new File("C:/work/tool-generator-crud/src/main/resources/mustache-templates/partials");
-    ////////////////////////////
-
+  
+  public static Map<String, Object> prepareTemplate(List<SpecMethod> methods, 
+      String entityName, String entityId, String EntityName, String entity_name_dash, String entityname) {
+    
     Map<String, Object> m = new HashMap<>();
 
     m.put("entityName", entityName);
@@ -65,12 +33,8 @@ public class Main {
     m.put("EntityName", EntityName);
     m.put("entity_name_dash", entity_name_dash);
     m.put("entityname", entityname);
-
-    List<SpecMethod> methods;
-    try (Reader r = new FileReader(apiSpec)) {
-      methods = new ApiSpecMethodExtractorJson().extract(r);
-    }
-
+    
+    // common field map
     Map<String, FieldType> fieldMap = new HashMap<>();
 
     {
@@ -90,7 +54,7 @@ public class Main {
                 if (fieldName.equals(entityId)) { // skip field for entityId
                   continue;
                 }
-                
+
                 Map<String, Object> propertyMap = (Map) propertiesMap.get(fieldName);
                 if (propertyMap != null) {
 
@@ -127,7 +91,7 @@ public class Main {
                   Map<String, Object> field = createField(fieldName, fieldType);
 
                   // register field
-                  fieldMap.put(fieldName, fieldType);
+                  fieldMap.putIfAbsent(fieldName, fieldType);
 
                   fieldsList.add(field);
                   fieldsDetail.add(field);
@@ -154,7 +118,7 @@ public class Main {
                 if (fieldName.equals(entityId)) { // skip field for entityId
                   continue;
                 }
-                
+
                 // some fields (options) might be truncated (value only), so look at the field map built on getRecordById method
                 if (fieldName.endsWith("Code")) {
                   String optionFieldName = fieldName.substring(0, fieldName.length() - "Code".length());
@@ -162,10 +126,7 @@ public class Main {
                   if (fieldType == FieldType.OPTION) {
                     // this is a truncated options field
                     Map<String, Object> field = createField(optionFieldName, fieldType);
-                    String FieldName = capitalize(optionFieldName);
                     field.put("isFieldRequired", true);
-                    field.put("FieldName", FieldName);
-
                     fieldsCreate.add(field);
                   }
                 } else {
@@ -188,6 +149,10 @@ public class Main {
                     }
 
                     Map<String, Object> field = createField(fieldName, fieldType);
+
+                    // register field
+                    fieldMap.putIfAbsent(fieldName, fieldType);
+
                     field.put("isFieldRequired", true);
                     fieldsCreate.add(field);
                   }
@@ -214,7 +179,7 @@ public class Main {
                 if (fieldName.equals(entityId)) { // skip field for entityId
                   continue;
                 }
-                
+
                 // some fields (options) might be truncated (value only), so look at the field map built on getRecordById method
                 if (fieldName.endsWith("Code")) {
                   String optionFieldName = fieldName.substring(0, fieldName.length() - "Code".length());
@@ -222,10 +187,7 @@ public class Main {
                   if (fieldType == FieldType.OPTION) {
                     // this is a truncated options field
                     Map<String, Object> field = createField(optionFieldName, fieldType);
-                    String FieldName = capitalize(optionFieldName);
                     field.put("isFieldRequired", true);
-                    field.put("FieldName", FieldName);
-
                     fieldsEdit.add(field);
                   }
                 } else {
@@ -248,6 +210,10 @@ public class Main {
                     }
 
                     Map<String, Object> field = createField(fieldName, fieldType);
+
+                    // register field
+                    fieldMap.putIfAbsent(fieldName, fieldType);
+
                     field.put("isFieldRequired", true);
                     fieldsEdit.add(field);
                   }
@@ -278,7 +244,7 @@ public class Main {
                     if (fieldName.equals(entityId)) { // skip field for entityId
                       continue;
                     }
-                    
+
                     // some fields (options) might be truncated (value only), so look at the field map built on getRecordById method
                     if (fieldName.endsWith("Code")) {
                       String optionFieldName = fieldName.substring(0, fieldName.length() - "Code".length());
@@ -286,9 +252,6 @@ public class Main {
                       if (fieldType == FieldType.OPTION) {
                         // this is a truncated options field
                         Map<String, Object> field = createField(optionFieldName, fieldType);
-                        String FieldName = capitalize(optionFieldName);
-                        field.put("FieldName", FieldName);
-
                         fieldsSearch.add(field);
                       }
                     } else {
@@ -311,7 +274,10 @@ public class Main {
                         }
 
                         Map<String, Object> field = createField(fieldName, fieldType);
-                        field.put("isFieldRequired", true);
+
+                        // register field
+                        fieldMap.putIfAbsent(fieldName, fieldType);
+
                         fieldsSearch.add(field);
                       }
                     }
@@ -324,11 +290,60 @@ public class Main {
       }
     }
 
+    { // collect all options across all forms
+      List<Object> allOptions = new ArrayList<>();
+      for (String fieldName: fieldMap.keySet()) {
+        FieldType type = fieldMap.get(fieldName);
+        if (type == FieldType.OPTION) {
+          Map<String, Object> field = createField(fieldName, FieldType.OPTION);
+          String field_name_dash = dashize(fieldName);
+          field.put("field_name_dash", field_name_dash);
+          allOptions.add(field);
+        }
+      }
+      m.put("allOptions", allOptions);
+    }
 
-    Evaluator ev = new Evaluator(partialsRoot);
+    { // collect all field names across all forms
+      Set<String> allFieldNames = fieldMap.keySet();
+      m.put("allFieldNames", allFieldNames);
+    }
+    
+    return m;
+  }
 
-    ev.evaluateTemplateTree(templateRoot, outputRoot, m);
+  enum FieldType {
+    INTEGER, STRING, DATE, OPTION
+  }
 
-    System.out.println("Done!");
+  protected static String capitalize(String s) {
+    if (s == null) {
+      return null;
+    } else {
+      return Character.toUpperCase(s.charAt(0)) + s.substring(1);
+    }
+  }
+
+  /**
+   *
+   * @param fieldName fieldName to field-name
+   * @return
+   */
+  protected static String dashize(String fieldName) {
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < fieldName.length(); i++) {
+      char c =  fieldName.charAt(i);
+      if (Character.isUpperCase(c)) {
+        if (i > 0) {
+          sb.append('-');
+        }
+        sb.append(Character.toLowerCase(c));
+      } else if (Character.isLowerCase(c)) {
+        sb.append(c);
+      } else {
+        throw new IllegalArgumentException("Neither lowercase nor uppercase letter [" + c + "] in the word \"" + fieldName + "\", at " + i);
+      }
+    }
+    return sb.toString();
   }
 }

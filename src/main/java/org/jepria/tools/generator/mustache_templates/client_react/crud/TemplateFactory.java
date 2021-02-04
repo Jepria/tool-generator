@@ -1,10 +1,13 @@
-package org.jepria.tools.generator.core;
+package org.jepria.tools.generator.mustache_templates.client_react.crud;
 
 import org.jepria.tools.generator.core.parser.SpecMethod;
 
 import java.util.*;
 
-public class Templates {
+/**
+ * Creates data to evaluate {@code mustache-templates/client-react/crud/ROOT} template resource set with
+ */
+public class TemplateFactory {
 
   protected static Map<String, Object> createField(String fieldName, FieldType fieldType) {
     Map<String, Object> field = new HashMap<>();
@@ -22,9 +25,19 @@ public class Templates {
     }
     return field;
   }
-  
-  public static Map<String, Object> prepareTemplate(List<SpecMethod> methods, 
-      String entityName, String entityId, String EntityName, String entity_name_dash, String entityname) {
+
+  /**
+   * 
+   * @param methods
+   * @param entityName
+   * @param entityId
+   * @param EntityName
+   * @param entity_name_dash
+   * @param entityname
+   * @return map with data to evaluate {@code mustache-templates/client-react/crud/ROOT} template resource set with 
+   */
+  public static Map<String, Object> createDataForTemplate(List<SpecMethod> methods,
+                                                          String entityName, String entityId, String EntityName, String entity_name_dash, String entityname) {
     
     Map<String, Object> m = new HashMap<>();
 

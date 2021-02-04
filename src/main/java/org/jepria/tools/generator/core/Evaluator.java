@@ -34,51 +34,90 @@ public class Evaluator {
   public Mustache.Compiler getCompiler() {
     return compiler;
   }
-  
-  public void evaluateTemplateTree(File treeRoot, File outputRoot, Map<String, Object> values) throws IOException {
-    
-    String fileNameEvaluated = evaluateTemplate(new StringReader(treeRoot.getName()), values);
-    File newOutputRoot = new File(outputRoot, fileNameEvaluated);
-    
-    if (treeRoot.isDirectory()) {
-      newOutputRoot.mkdirs();
-      
-      File[] childFiles = treeRoot.listFiles();
 
-      if (childFiles != null) {
-        for (File childFile: childFiles) {
-          evaluateTemplateTree(childFile, newOutputRoot, values);
-        }
-      }
-    } else if (treeRoot.isFile()) {
-      
-      if (fileNameEvaluated.endsWith(".mustache")) { // a '.mustache' file that needs to be evaluated 
-        
-        String fileNameDemustached = fileNameEvaluated.substring(0, fileNameEvaluated.length() - ".mustache".length());
-        newOutputRoot = new File(outputRoot, fileNameDemustached);
-        newOutputRoot.createNewFile();
-        
-        try (Reader r = new FileReader(treeRoot); Writer w = new FileWriter(newOutputRoot)) {
-          String contentEvaluated = evaluateTemplate(r, values);
-          w.write(contentEvaluated);
-        }
-        
-      } else { // a regular file (possibly binary) that must be copied-as-is
+  /**
+   * Evaluates a tree of template files into a tree of output files
+   * @param templateTreeRoot an existing directory
+   * @param outputTreeRoot existing or non-existing directory (will be created)
+   * @param values
+   * @throws IOException
+   * @throws IllegalArgumentException if templateTreeRoot is not a directory
+   * When templateTreeRoot is a directory {@code a/b}, having a template {code a/b/c/d.mustache} inside, 
+   * and the outputTreeRoot is {@code x/y},
+   * then the evaluated (output) code will be {x/y/c/d.mustache}. 
+   * I.e. the outputTreeRoot matches the templateTreeRoot's last path part, preserving the original output path part name.
+   */
+  public void evaluateTemplateTree(File templateTreeRoot, File outputTreeRoot, Map<String, Object> values) throws IOException {
 
-        newOutputRoot.createNewFile();
-        
-        try (InputStream in = new FileInputStream(treeRoot); OutputStream os = new FileOutputStream(newOutputRoot)) {
-          byte[] buffer = new byte[1024];
-          int length;
-          while ((length = in.read(buffer)) > 0) {
-            os.write(buffer, 0, length);
-          }
+    if (!templateTreeRoot.isDirectory()) {
+      throw new IllegalArgumentException("templateTreeRoot must be a directory");
+    }
+
+    File[] templateTreeRootChilds = templateTreeRoot.listFiles();
+
+    if (templateTreeRootChilds != null) {
+      for (File templateTreeRootChild : templateTreeRootChilds) {
+
+        if (templateTreeRootChild.isDirectory()) {
+          String childFileNameEvaluated = evaluateTemplateText(new StringReader(templateTreeRootChild.getName()), values);
+          File newOutputTreeRoot = new File(outputTreeRoot, childFileNameEvaluated);
+          newOutputTreeRoot.mkdirs();
+
+          evaluateTemplateTree(templateTreeRootChild, newOutputTreeRoot, values);
+        } else {
+          evaluateTemplateFile(templateTreeRootChild, outputTreeRoot, values);
         }
       }
     }
   }
 
-  public String evaluateTemplate(Reader template, Map<String, Object> values) {
+  /**
+   * Evaluates a single template file into a single output file
+   * @param templateTreeFile an existing file
+   * @param outputTreeRoot existing or non-existing directory (will be created)
+   * @param values
+   * @throws IOException
+   * @throws IllegalArgumentException if templateTreeRoot is not a file
+   * When templateTreeRoot is a directory {@code a/b}, having a template {code a/b/c/d.mustache} inside, 
+   * and the outputTreeRoot is {@code x/y},
+   * then the evaluated (output) code will be {x/y/c/d.mustache}. 
+   * I.e. the outputTreeRoot matches the templateTreeRoot's last path part, preserving the original output path part name.
+   */
+  public void evaluateTemplateFile(File templateTreeFile, File outputTreeRoot, Map<String, Object> values) throws IOException {
+
+    if (!templateTreeFile.isFile()) {
+      throw new IllegalArgumentException("templateTreeFile must be a file");
+    }
+
+    String fileNameEvaluated = evaluateTemplateText(new StringReader(templateTreeFile.getName()), values);
+    
+    if (fileNameEvaluated.endsWith(".mustache")) { // a '.mustache' file that needs to be evaluated
+
+      String fileNameDemustached = fileNameEvaluated.substring(0, fileNameEvaluated.length() - ".mustache".length());
+      File outputFile = new File(outputTreeRoot, fileNameDemustached);
+      outputFile.createNewFile();
+      
+      try (Reader r = new FileReader(templateTreeFile); Writer w = new FileWriter(outputFile)) {
+        String contentEvaluated = evaluateTemplateText(r, values);
+        w.write(contentEvaluated);
+      }
+
+    } else { // a regular file (possibly binary) that must be copied-as-is
+
+      File outputFile = new File(outputTreeRoot, fileNameEvaluated);
+      outputFile.createNewFile();
+      
+      try (InputStream in = new FileInputStream(templateTreeFile); OutputStream os = new FileOutputStream(outputFile)) {
+        byte[] buffer = new byte[1024];
+        int length;
+        while ((length = in.read(buffer)) > 0) {
+          os.write(buffer, 0, length);
+        }
+      }
+    }
+  }
+    
+  public String evaluateTemplateText(Reader template, Map<String, Object> values) {
     Template t = getCompiler().compile(template);
     return t.execute(values);
   }

@@ -3,6 +3,7 @@ package org.jepria.tools.generator.mustache_templates.client_react.crud;
 import org.jepria.tools.generator.core.parser.SpecMethod;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Creates data to evaluate {@code mustache-templates/client-react/crud/ROOT} template resource set with
@@ -57,7 +58,8 @@ public class TemplateFactory {
       m.put("fieldsDetail", fieldsDetail);
 
       for (SpecMethod method : methods) {
-        if (method.path().equals("/" + entity_name_dash + "/{recordId}") && "get".equals(method.httpMethod())) {
+        // /entity-name/{recordId}
+        if (method.path().matches("/" + Pattern.quote(entity_name_dash) + "/\\{[^}]+}") && "get".equals(method.httpMethod())) {
           Map<String, Object> responseBodySchema = method.responseBodySchema();
           if (responseBodySchema != null) {
             Map<String, Object> propertiesMap = (Map) responseBodySchema.get("properties");
@@ -182,7 +184,8 @@ public class TemplateFactory {
       m.put("fieldsEdit", fieldsEdit);
 
       for (SpecMethod method : methods) {
-        if (method.path().equals("/" + entity_name_dash + "/{recordId}") && "put".equals(method.httpMethod())) {
+        // /entity-name/{recordId}
+        if (method.path().matches("/" + Pattern.quote(entity_name_dash) + "/\\{[^}]+}") && "put".equals(method.httpMethod())) {
           Map<String, Object> requestBodySchema = method.requestBodySchema();
           if (requestBodySchema != null) {
             Map<String, Object> propertiesMap = (Map) requestBodySchema.get("properties");

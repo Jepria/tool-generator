@@ -1,13 +1,12 @@
 package org.jepria.tools.generator.cli;
 
 import org.jepria.tools.generator.core.Evaluator;
+import org.jepria.tools.generator.core.Path;
 import org.jepria.tools.generator.core.parser.ApiSpecMethodExtractorJson;
 import org.jepria.tools.generator.core.parser.SpecMethod;
 import org.jepria.tools.generator.mustache_templates.client_react.crud.TemplateFactory;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -176,22 +175,19 @@ public class Main {
       
       {
         File file = null;
-        Path path = null;
         try {
-          path = Paths.get(apiSpecPaths.get(0));
+          file = Paths.get(apiSpecPaths.get(0)).toFile();
         } catch (Throwable e) {
           e.printStackTrace(); // TODO
           failed = true;
           failMessages.add("Incorrect file path [" + apiSpecPaths.get(0) + "]: resolve exception");
         }
-        if (!Files.exists(path)) {
+        if (!file.exists()) {
           failed = true;
           failMessages.add("Incorrect file path [" + apiSpecPaths.get(0) + "]: file does not exist");
-        } else if (!Files.isRegularFile(path)) {
+        } else if (!file.isFile()) {
           failed = true;
           failMessages.add("Incorrect file path [" + apiSpecPaths.get(0) + "]: not a regular file");
-        } else {
-          file = path.toFile();
         }
 
         apiSpec = file;
@@ -200,22 +196,19 @@ public class Main {
 
       {
         File file = null;
-        Path path = null;
         try {
-          path = Paths.get(templateRootMstPath);
+          file = Paths.get(templateRootMstPath).toFile();
         } catch (Throwable e) {
           e.printStackTrace(); // TODO
           failed = true;
           failMessages.add("Incorrect file path [" + templateRootMstPath + "]: resolve exception");
         }
-        if (!Files.exists(path)) {
+        if (!file.exists()) {
           failed = true;
           failMessages.add("Incorrect file path [" + templateRootMstPath + "]: file does not exist");
-        } else if (!Files.isDirectory(path)) {
+        } else if (!file.isDirectory()) {
           failed = true;
           failMessages.add("Incorrect file path [" + templateRootMstPath + "]: not a directory");
-        } else {
-          file = path.toFile();
         }
         
         templateRootMst = file;
@@ -223,38 +216,35 @@ public class Main {
 
       {
         File file = null;
-        Path path = null;
         try {
-          path = Paths.get(partialsRootMstPath);
+          file = Paths.get(partialsRootMstPath).toFile();
         } catch (Throwable e) {
           e.printStackTrace(); // TODO
           failed = true;
           failMessages.add("Incorrect file path [" + partialsRootMstPath + "]: resolve exception");
         }
-        if (!Files.exists(path)) {
+        if (!file.exists()) {
           failed = true;
           failMessages.add("Incorrect file path [" + partialsRootMstPath + "]: file does not exist");
-        } else if (!Files.isDirectory(path)) {
+        } else if (!file.isDirectory()) {
           failed = true;
           failMessages.add("Incorrect file path [" + partialsRootMstPath + "]: not a directory");
-        } else {
-          file = path.toFile();
         }
 
         partialsRootMst = file;
       }
       
       {
-        Path path = null;
+        File file = null;
         try {
-          path = Paths.get(outputRootDirPath);
+          file = Paths.get(outputRootDirPath).toFile();
         } catch (Throwable e) {
           e.printStackTrace(); // TODO
           failed = true;
           failMessages.add("Incorrect file path [" + outputRootDirPath + "]: resolve exception");
         }
 
-        outputRootDir = path.toFile();
+        outputRootDir = file;
       }
       
       if (failed) {
@@ -296,10 +286,10 @@ public class Main {
       Map<String, Object> m = TemplateFactory.createDataForTemplate(methods,
               entityName, entityId, EntityName, entity_name_dash, entityname);
 
-      Evaluator ev = new Evaluator(partialsRootMst);
+      Evaluator ev = new Evaluator(new Path.FilePath(partialsRootMst));
 
       try {
-        ev.evaluateTemplateTree(templateRootMst, outputRootDir, m);
+        ev.evaluateTemplateTree(new Path.FilePath(templateRootMst), outputRootDir, m);
       } catch (IOException e) {
         throw new RuntimeException(e);
       }

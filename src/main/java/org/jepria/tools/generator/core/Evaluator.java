@@ -8,9 +8,9 @@ import java.util.Map;
 
 public class Evaluator {
   
-  protected final Mustache.Compiler compiler; 
+  protected final Mustache.Compiler compiler;
   
-  public Evaluator(File partialDirRoot) {
+  public Evaluator(Path partialDirRoot) {
     Mustache.Compiler compiler = Mustache.compiler()
             .withDelims("[@ @]")
             .defaultValue("").escapeHTML(false);
@@ -19,7 +19,7 @@ public class Evaluator {
       compiler = compiler.withLoader(new Mustache.TemplateLoader() {
         @Override
         public Reader getTemplate(String s) throws Exception {
-          return new FileReader(new File(partialDirRoot, s));
+          return new InputStreamReader(partialDirRoot.append(s).newInputStream());
         }
       });
     }
@@ -47,7 +47,7 @@ public class Evaluator {
    * then the evaluated (output) code will be {x/y/c/d.mustache}. 
    * I.e. the outputTreeRoot matches the templateTreeRoot's last path part, preserving the original output path part name.
    */
-  public void evaluateTemplateTree(File templateTreeRoot, File outputTreeRoot, Map<String, Object> values) throws IOException {
+  public void evaluateTemplateTree(Path templateTreeRoot, File outputTreeRoot, Map<String, Object> values) throws IOException {
 
     if (!templateTreeRoot.isDirectory()) {
       throw new IllegalArgumentException("templateTreeRoot must be a directory");
@@ -55,10 +55,10 @@ public class Evaluator {
 
     outputTreeRoot.mkdirs();
     
-    File[] templateTreeRootChilds = templateTreeRoot.listFiles();
+    Path[] templateTreeRootChilds = templateTreeRoot.listFiles();
 
     if (templateTreeRootChilds != null) {
-      for (File templateTreeRootChild : templateTreeRootChilds) {
+      for (Path templateTreeRootChild : templateTreeRootChilds) {
 
         if (templateTreeRootChild.isDirectory()) {
           String childFileNameEvaluated = evaluateTemplateText(new StringReader(templateTreeRootChild.getName()), values);
@@ -85,7 +85,7 @@ public class Evaluator {
    * then the evaluated (output) code will be {x/y/c/d.mustache}. 
    * I.e. the outputTreeRoot matches the templateTreeRoot's last path part, preserving the original output path part name.
    */
-  public void evaluateTemplateFile(File templateTreeFile, File outputTreeRoot, Map<String, Object> values) throws IOException {
+  public void evaluateTemplateFile(Path templateTreeFile, File outputTreeRoot, Map<String, Object> values) throws IOException {
 
     if (!templateTreeFile.isFile()) {
       throw new IllegalArgumentException("templateTreeFile must be a file");
@@ -99,7 +99,7 @@ public class Evaluator {
       File outputFile = new File(outputTreeRoot, fileNameDemustached);
       outputFile.createNewFile();
       
-      try (Reader r = new FileReader(templateTreeFile); Writer w = new FileWriter(outputFile)) {
+      try (Reader r = new InputStreamReader(templateTreeFile.newInputStream()); Writer w = new FileWriter(outputFile)) {
         String contentEvaluated = evaluateTemplateText(r, values);
         w.write(contentEvaluated);
       }
@@ -109,7 +109,7 @@ public class Evaluator {
       File outputFile = new File(outputTreeRoot, fileNameEvaluated);
       outputFile.createNewFile();
       
-      try (InputStream in = new FileInputStream(templateTreeFile); OutputStream os = new FileOutputStream(outputFile)) {
+      try (InputStream in = templateTreeFile.newInputStream(); OutputStream os = new FileOutputStream(outputFile)) {
         byte[] buffer = new byte[1024];
         int length;
         while ((length = in.read(buffer)) > 0) {

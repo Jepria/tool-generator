@@ -53,6 +53,8 @@ public class Evaluator {
       throw new IllegalArgumentException("templateTreeRoot must be a directory");
     }
 
+    outputTreeRoot.mkdirs();
+    
     File[] templateTreeRootChilds = templateTreeRoot.listFiles();
 
     if (templateTreeRootChilds != null) {

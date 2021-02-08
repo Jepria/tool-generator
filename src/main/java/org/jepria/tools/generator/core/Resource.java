@@ -1,78 +1,87 @@
 package org.jepria.tools.generator.core;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
+ * Represents a readable resource in a tree-structured environment (like a usual file or a directory).
  * Common adapter for each of {@link java.nio.file.Path}, {@link File} and jar resource interfaces
  */
-public interface Path {
+public interface Resource {
   boolean isDirectory();
 
   boolean isFile();
 
-  Path[] listFiles();
+  List<Resource> listChilds();
 
   String getName();
 
   InputStream newInputStream();
   
-  Path append(String child);
-  
-  class FilePath implements Path {
+  Resource append(String child);
 
-    protected final File file;
+  /**
+   * An implementation based on a {@link java.nio.file.Path}
+   */
+  class PathResourceImpl implements Resource {
 
-    public FilePath(File file) {
-      this.file = file;
+    protected final Path path;
+
+    public PathResourceImpl(Path path) {
+      this.path = path;
     }
 
     @Override
     public boolean isDirectory() {
-      return file.isDirectory();
+      return Files.isDirectory(path);
     }
 
     @Override
     public boolean isFile() {
-      return file.isFile();
+      return Files.isRegularFile(path);
     }
 
     @Override
-    public Path[] listFiles() {
-      File[] files = file.listFiles();
-      if (files == null) {
-        return null;
-      } else {
-        Path[] paths = new Path[files.length];
-        for (int i = 0; i < files.length; i++) {
-          paths[i] = new FilePath(files[i]);
-        }
-        return paths;
-      }
-    }
-
-    @Override
-    public String getName() {
-      return file.getName();
-    }
-
-    @Override
-    public InputStream newInputStream() {
+    public List<Resource> listChilds() {
       try {
-        return new FileInputStream(file);
-      } catch (FileNotFoundException e) {
+        return Files.walk(path, 1)
+                .filter(anotherPath -> !anotherPath.equals(path)) // exclude the file tree root itself
+                .map(path -> new PathResourceImpl(path)).collect(Collectors.toList());
+      } catch (IOException e) {
         throw new RuntimeException(e);
       }
     }
 
     @Override
-    public Path append(String child) {
-      return new FilePath(new File(file, child));
+    public String getName() {
+      return path.getFileName().toString();
+    }
+
+    @Override
+    public InputStream newInputStream() {
+      try {
+        return Files.newInputStream(path);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    @Override
+    public Resource append(String child) {
+      return new PathResourceImpl(path.resolve(child));
+    }
+
+    @Override
+    public String toString() {
+      return path.toString();
     }
   }
 
-  class JarResourceRoot implements Path {
+  class JarResourceRoot implements Resource {
 
     protected final String root;
     
@@ -103,8 +112,8 @@ public interface Path {
     }
 
     @Override
-    public Path[] listFiles() {
-      return new Path[0];
+    public List<Resource> listChilds() {
+      return null;
     }
 
     @Override
@@ -118,7 +127,7 @@ public interface Path {
     }
 
     @Override
-    public Path append(String child) {
+    public Resource append(String child) {
       return null;
     }
 

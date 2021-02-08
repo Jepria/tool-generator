@@ -4,13 +4,14 @@ import com.samskivert.mustache.Mustache;
 import com.samskivert.mustache.Template;
 
 import java.io.*;
+import java.util.List;
 import java.util.Map;
 
 public class Evaluator {
   
   protected final Mustache.Compiler compiler;
   
-  public Evaluator(Path partialDirRoot) {
+  public Evaluator(Resource partialDirRoot) {
     Mustache.Compiler compiler = Mustache.compiler()
             .withDelims("[@ @]")
             .defaultValue("").escapeHTML(false);
@@ -47,7 +48,7 @@ public class Evaluator {
    * then the evaluated (output) code will be {x/y/c/d.mustache}. 
    * I.e. the outputTreeRoot matches the templateTreeRoot's last path part, preserving the original output path part name.
    */
-  public void evaluateTemplateTree(Path templateTreeRoot, File outputTreeRoot, Map<String, Object> values) throws IOException {
+  public void evaluateTemplateTree(Resource templateTreeRoot, File outputTreeRoot, Map<String, Object> values) throws IOException {
 
     if (!templateTreeRoot.isDirectory()) {
       throw new IllegalArgumentException("templateTreeRoot must be a directory");
@@ -55,10 +56,10 @@ public class Evaluator {
 
     outputTreeRoot.mkdirs();
     
-    Path[] templateTreeRootChilds = templateTreeRoot.listFiles();
-
+    List<Resource> templateTreeRootChilds = templateTreeRoot.listChilds();
+    
     if (templateTreeRootChilds != null) {
-      for (Path templateTreeRootChild : templateTreeRootChilds) {
+      for (Resource templateTreeRootChild : templateTreeRootChilds) {
 
         if (templateTreeRootChild.isDirectory()) {
           String childFileNameEvaluated = evaluateTemplateText(new StringReader(templateTreeRootChild.getName()), values);
@@ -85,7 +86,7 @@ public class Evaluator {
    * then the evaluated (output) code will be {x/y/c/d.mustache}. 
    * I.e. the outputTreeRoot matches the templateTreeRoot's last path part, preserving the original output path part name.
    */
-  public void evaluateTemplateFile(Path templateTreeFile, File outputTreeRoot, Map<String, Object> values) throws IOException {
+  public void evaluateTemplateFile(Resource templateTreeFile, File outputTreeRoot, Map<String, Object> values) throws IOException {
 
     if (!templateTreeFile.isFile()) {
       throw new IllegalArgumentException("templateTreeFile must be a file");

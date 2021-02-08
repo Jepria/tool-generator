@@ -1,7 +1,7 @@
 package org.jepria.tools.generator.cli;
 
 import org.jepria.tools.generator.core.Evaluator;
-import org.jepria.tools.generator.core.Path;
+import org.jepria.tools.generator.core.Resource;
 import org.jepria.tools.generator.core.parser.ApiSpecMethodExtractorJson;
 import org.jepria.tools.generator.core.parser.SpecMethod;
 import org.jepria.tools.generator.mustache_templates.client_react.crud.TemplateFactory;
@@ -286,10 +286,10 @@ public class Main {
       Map<String, Object> m = TemplateFactory.createDataForTemplate(methods,
               entityName, entityId, EntityName, entity_name_dash, entityname);
 
-      Evaluator ev = new Evaluator(new Path.FilePath(partialsRootMst));
+      Evaluator ev = new Evaluator(new Resource.PathResourceImpl(partialsRootMst.toPath()));
 
       try {
-        ev.evaluateTemplateTree(new Path.FilePath(templateRootMst), outputRootDir, m);
+        ev.evaluateTemplateTree(new Resource.PathResourceImpl(templateRootMst.toPath()), outputRootDir, m);
       } catch (IOException e) {
         throw new RuntimeException(e);
       }

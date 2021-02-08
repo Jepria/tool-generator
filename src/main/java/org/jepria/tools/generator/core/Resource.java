@@ -1,9 +1,13 @@
 package org.jepria.tools.generator.core;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
+import org.jepria.tools.generator.cli.Main;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.nio.file.*;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -81,84 +85,39 @@ public interface Resource {
     }
   }
 
-  class JarResourceRoot implements Resource {
-
-    protected final String root;
-    
-    public JarResourceRoot(String root) {
-      if (root == null) {
-        this.root = "";
-      } else if (root.endsWith("/")) {
-        this.root = root.substring(0, root.length() - 1);
-      } else {
-        this.root = root;
-      }
+  static Resource fromJarResourceRoot(String resourceRoot) {
+    if (resourceRoot != null && !resourceRoot.startsWith("/")) {
+      resourceRoot = "/" + resourceRoot;
     }
 
-    public JarResourceRoot() {
-      this(null);
-    }
-    
-    protected final ResourceScanner rs = new ResourceScanner();
-    
-    @Override
-    public boolean isDirectory() {
-      return true;
-    }
+    Path path;
 
-    @Override
-    public boolean isFile() {
-      return false;
-    }
-
-    @Override
-    public List<Resource> listChilds() {
-      return null;
-    }
-
-    @Override
-    public String getName() {
-      return null;
-    }
-
-    @Override
-    public InputStream newInputStream() {
-      return null;
-    }
-
-    @Override
-    public Resource append(String child) {
-      return null;
-    }
-
-    // https://stackoverflow.com/questions/3923129/get-a-list-of-resources-from-classpath-directory
-    static class ResourceScanner {
-      private List<String> getResourceFiles(String path) throws IOException {
-        List<String> filenames = new ArrayList<>();
-
-        try (
-                InputStream in = getResourceAsStream(path);
-                BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
-          String resource;
-
-          while ((resource = br.readLine()) != null) {
-            filenames.add(resource);
-          }
+    try {
+      URI uri = Main.class.getResource(resourceRoot).toURI();
+      if (uri.getScheme().equals("jar")) {
+        FileSystem fileSystem;
+        
+        // TODO fragile solution: 
+        //  when creating more than one FileSystem from a single jar
+        //  (e.g. for partials-root and template-root resource directories),
+        //  the other throws FileSystemAlreadyExistsException. In that case, use the FileSystem that must have been already created.
+        //  But what is the owner of the first FileSystem closes it?
+        //  see https://stackoverflow.com/questions/55892386/how-to-handle-filesystemalreadyexistsexception
+        try {
+          fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
+        } catch (FileSystemAlreadyExistsException e) {
+          fileSystem = FileSystems.getFileSystem(uri);
         }
-
-        return filenames;
+        path = fileSystem.getPath(resourceRoot);
+      } else {
+        path = Paths.get(uri);
       }
 
-      private InputStream getResourceAsStream(String resource) {
-        final InputStream in
-                = getContextClassLoader().getResourceAsStream(resource);
-
-        return in == null ? getClass().getResourceAsStream(resource) : in;
-      }
-
-      private ClassLoader getContextClassLoader() {
-        return Thread.currentThread().getContextClassLoader();
-      }
+    } catch (Throwable e) {
+      throw new RuntimeException(e);
     }
+
+    return new PathResourceImpl(path);
   }
+
 }

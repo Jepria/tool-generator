@@ -166,6 +166,10 @@ public class Main {
       boolean failed = false;
       List<String> failMessages = new ArrayList<>();
 
+      File apiSpec = null;
+      File templateRootMst = null;
+      File partialsRootMst = null;
+      File outputRootDir = null;
 
       // TODO add support for multi-spec generation
       if (apiSpecPaths.size() > 1) {
@@ -174,92 +178,86 @@ public class Main {
       }
       
       {
-        File file = null;
         try {
-          file = Paths.get(apiSpecPaths.get(0)).toFile();
+          apiSpec = Paths.get(apiSpecPaths.get(0)).toFile();
         } catch (Throwable e) {
           e.printStackTrace(); // TODO
           failed = true;
           failMessages.add("Incorrect file path [" + apiSpecPaths.get(0) + "]: resolve exception");
         }
-        if (!file.exists()) {
+        if (!apiSpec.exists()) {
           failed = true;
           failMessages.add("Incorrect file path [" + apiSpecPaths.get(0) + "]: file does not exist");
-        } else if (!file.isFile()) {
+        } else if (!apiSpec.isFile()) {
           failed = true;
           failMessages.add("Incorrect file path [" + apiSpecPaths.get(0) + "]: not a regular file");
         }
-
-        apiSpec = file;
       }
       
 
-      {
-        File file = null;
+      if (templateRootMstPath != null) {
         try {
-          file = Paths.get(templateRootMstPath).toFile();
+          templateRootMst = Paths.get(templateRootMstPath).toFile();
         } catch (Throwable e) {
           e.printStackTrace(); // TODO
           failed = true;
           failMessages.add("Incorrect file path [" + templateRootMstPath + "]: resolve exception");
         }
-        if (!file.exists()) {
+        if (!templateRootMst.exists()) {
           failed = true;
           failMessages.add("Incorrect file path [" + templateRootMstPath + "]: file does not exist");
-        } else if (!file.isDirectory()) {
+        } else if (!templateRootMst.isDirectory()) {
           failed = true;
           failMessages.add("Incorrect file path [" + templateRootMstPath + "]: not a directory");
         }
         
-        templateRootMst = file;
+        System.out.println("Custom template root: " + templateRootMst);
       }
 
-      {
-        File file = null;
+      if (partialsRootMstPath != null) {
         try {
-          file = Paths.get(partialsRootMstPath).toFile();
+          partialsRootMst = Paths.get(partialsRootMstPath).toFile();
         } catch (Throwable e) {
           e.printStackTrace(); // TODO
           failed = true;
           failMessages.add("Incorrect file path [" + partialsRootMstPath + "]: resolve exception");
         }
-        if (!file.exists()) {
+        if (!partialsRootMst.exists()) {
           failed = true;
           failMessages.add("Incorrect file path [" + partialsRootMstPath + "]: file does not exist");
-        } else if (!file.isDirectory()) {
+        } else if (!partialsRootMst.isDirectory()) {
           failed = true;
           failMessages.add("Incorrect file path [" + partialsRootMstPath + "]: not a directory");
         }
 
-        partialsRootMst = file;
+        System.out.println("Custom partials root: " + partialsRootMst);
       }
       
       {
-        File file = null;
         try {
-          file = Paths.get(outputRootDirPath).toFile();
+          outputRootDir = Paths.get(outputRootDirPath).toFile();
         } catch (Throwable e) {
           e.printStackTrace(); // TODO
           failed = true;
           failMessages.add("Incorrect file path [" + outputRootDirPath + "]: resolve exception");
         }
-
-        outputRootDir = file;
       }
       
       if (failed) {
         throw new PrepareException(failMessages);
       }
 
-      
-      
-      
-      
-      entity_name_dash = apiSpec.getParentFile().getName();
-      entityName = undashize(entity_name_dash);
-      entityId = entityName + "Id";
-      EntityName = capitalize(entityName);
-      entityname = dashize(entityName).replaceAll("-", "");
+
+      this.apiSpec = apiSpec;
+      this.templateRootMst = templateRootMst;
+      this.partialsRootMst = partialsRootMst;
+      this.outputRootDir = outputRootDir;
+
+      this.entity_name_dash = apiSpec.getParentFile().getName();
+      this.entityName = undashize(entity_name_dash);
+      this.entityId = entityName + "Id";
+      this.EntityName = capitalize(entityName);
+      this.entityname = dashize(entityName).replaceAll("-", "");
 
       { // log everything
         out.println("Spell-check:");
@@ -286,10 +284,15 @@ public class Main {
       Map<String, Object> m = TemplateFactory.createDataForTemplate(methods,
               entityName, entityId, EntityName, entity_name_dash, entityname);
 
-      Evaluator ev = new Evaluator(new Resource.PathResourceImpl(partialsRootMst.toPath()));
-
+      Resource templateRootResource = templateRootMst != null ? new Resource.PathResourceImpl(templateRootMst.toPath()) :
+              Resource.fromJarResourceRoot("/mustache-templates/client-react/crud/ROOT");
+      Resource partialsRootResource = partialsRootMst != null ? new Resource.PathResourceImpl(partialsRootMst.toPath()) :
+              Resource.fromJarResourceRoot("/mustache-templates/client-react/partials");
+      
+      Evaluator ev = new Evaluator(partialsRootResource);
+      
       try {
-        ev.evaluateTemplateTree(new Resource.PathResourceImpl(templateRootMst.toPath()), outputRootDir, m);
+        ev.evaluateTemplateTree(templateRootResource, outputRootDir, m);
       } catch (IOException e) {
         throw new RuntimeException(e);
       }

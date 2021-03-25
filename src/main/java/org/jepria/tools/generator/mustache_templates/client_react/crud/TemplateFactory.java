@@ -246,58 +246,54 @@ public class TemplateFactory {
       m.put("fieldsSearch", fieldsSearch);
 
       for (SpecMethod method : methods) {
-        if (method.path().equals("/" + entity_name_dash + "/search") && "post".equals(method.httpMethod())) {
-          Map<String, Object> requestBodySchema = method.requestBodySchema();
-          if (requestBodySchema != null) {
-            Map<String, Object> propertiesMap0 = (Map) requestBodySchema.get("properties");
-            if (propertiesMap0 != null) {
-              Map<String, Object> templateMap = (Map) propertiesMap0.get("template");
-              if (templateMap != null) {
-                Map<String, Object> propertiesMap = (Map) templateMap.get("properties");
-                if (propertiesMap != null) {
-                  for (String fieldName : propertiesMap.keySet()) {
+        if (method.path().equals("/" + entity_name_dash + "/search") && "get".equals(method.httpMethod())) {
+          
+          List<SpecMethod.Parameter> params = method.params();
+          for (SpecMethod.Parameter param: params) {
+            String fieldName = param.name();
+            if ("query".equalsIgnoreCase(param.in()) 
+                    && !"pageSize".equals(fieldName)
+                    && !"page".equals(fieldName)
+                    && !"sort".equals(fieldName)) {
+              
+              if (fieldName.equals(entityId)) { // skip field for entityId
+                continue;
+              }
 
-                    if (fieldName.equals(entityId)) { // skip field for entityId
-                      continue;
-                    }
+              // some fields (options) might be truncated (value only), so look at the field map built on getRecordById method
+              if (fieldName.endsWith("Code")) {
+                String optionFieldName = fieldName.substring(0, fieldName.length() - "Code".length());
+                FieldType fieldType = fieldMap.get(optionFieldName);
+                if (fieldType == FieldType.OPTION) {
+                  // this is a truncated options field
+                  Map<String, Object> field = createField(optionFieldName, fieldType);
+                  fieldsSearch.add(field);
+                }
+              } else {
 
-                    // some fields (options) might be truncated (value only), so look at the field map built on getRecordById method
-                    if (fieldName.endsWith("Code")) {
-                      String optionFieldName = fieldName.substring(0, fieldName.length() - "Code".length());
-                      FieldType fieldType = fieldMap.get(optionFieldName);
-                      if (fieldType == FieldType.OPTION) {
-                        // this is a truncated options field
-                        Map<String, Object> field = createField(optionFieldName, fieldType);
-                        fieldsSearch.add(field);
-                      }
+                Map<String, Object> propertyMap = param.schema();
+                if (propertyMap != null) {
+
+                  FieldType fieldType = null;
+
+                  String fieldTypeStr = (String) propertyMap.get("type");
+                  if ("integer".equals(fieldTypeStr)) {
+                    fieldType = FieldType.INTEGER;
+                  } else if ("string".equals(fieldTypeStr)) {
+                    String format = (String) propertyMap.get("format");
+                    if ("date-time".equals(format)) {
+                      fieldType = FieldType.DATE;
                     } else {
-
-                      Map<String, Object> propertyMap = (Map) propertiesMap.get(fieldName);
-                      if (propertyMap != null) {
-
-                        FieldType fieldType = null;
-
-                        String fieldTypeStr = (String) propertyMap.get("type");
-                        if ("integer".equals(fieldTypeStr)) {
-                          fieldType = FieldType.INTEGER;
-                        } else if ("string".equals(fieldTypeStr)) {
-                          String format = (String) propertyMap.get("format");
-                          if ("date-time".equals(format)) {
-                            fieldType = FieldType.DATE;
-                          } else {
-                            fieldType = FieldType.STRING;
-                          }
-                        }
-
-                        Map<String, Object> field = createField(fieldName, fieldType);
-
-                        // register field
-                        fieldMap.putIfAbsent(fieldName, fieldType);
-
-                        fieldsSearch.add(field);
-                      }
+                      fieldType = FieldType.STRING;
                     }
                   }
+
+                  Map<String, Object> field = createField(fieldName, fieldType);
+
+                  // register field
+                  fieldMap.putIfAbsent(fieldName, fieldType);
+
+                  fieldsSearch.add(field);
                 }
               }
             }

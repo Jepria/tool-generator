@@ -53,6 +53,8 @@ public class ApiSpecMethodExtractorJson {
                 requestBodySchema = requestBodySchema0;
               }
 
+              String operationId = (String)methodMap.get("operationId");
+              
               // extract params
               final List<SpecMethod.Parameter> params = new ArrayList<>();
               {
@@ -132,6 +134,16 @@ public class ApiSpecMethodExtractorJson {
                 @Override
                 public Map<String, Object> responseBodySchema() {
                   return responseBodySchema;
+                }
+
+                @Override
+                public String operationId() {
+                  return operationId;
+                }
+
+                @Override
+                public String toString() {
+                  return path() + ":" + httpMethod();
                 }
               };
 

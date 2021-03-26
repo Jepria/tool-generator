@@ -1,0 +1,111 @@
+import React, { useEffect, useRef, useState } from "react";
+import { useHistory, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useFormik } from "formik";
+import { useDispatch, useSelector } from "react-redux";
+import { ComboBox, ComboBoxItem, Form } from "@jfront/ui-core";
+import {
+  [@#fieldsCreate@]
+  [@#isTypeOption@][@FieldName@]Option,[@/isTypeOption@]
+  [@/fieldsCreate@]
+  [@EntityName@], [@EntityName@]Create } from "../api/[@EntityName@]Types";
+import { create[@EntityName@],
+  [@#fieldsCreate@]
+  [@#isTypeOption@]get[@FieldName@]Options,[@/isTypeOption@]
+  [@/fieldsCreate@]
+} from "../api/[@EntityName@]Api";
+import {
+  selectSaveOnCreate[@EntityName@],
+  submitSavedOnCreate[@EntityName@],
+} from "../state/[@entityName@]Slice";
+
+const [@EntityName@]CreatePage = ({ formRef }) => {
+  //----------------
+  // let formRef = useRef(null) as any;
+  const { t } = useTranslation();
+  const history = useHistory();
+  const dispatch = useDispatch();
+  //----------------
+  let { [@parentEntityId@] } = useParams<any>();
+  
+  [@#fieldsCreate@]
+  [@#isTypeOption@]const [[@fieldName@]Options, set[@FieldName@]Options] = useState<[@FieldName@]Option[]>();[@/isTypeOption@]
+  [@/fieldsCreate@]
+
+  [@#fieldsCreate@]
+  [@#isTypeOption@]
+  useEffect(() => {
+    get[@FieldName@]Options().then((options) => {
+      set[@FieldName@]Options(options);
+    });
+  }, []);
+  [@/isTypeOption@]
+  [@/fieldsCreate@]
+  
+  const onSave = useSelector(selectSaveOnCreate[@EntityName@]);
+
+  useEffect(() => {
+    if (onSave) {
+      dispatch(submitSavedOnCreate[@EntityName@]());
+      formRef.current?.dispatchEvent(new Event("submit"));
+    }
+  }, [onSave]);
+
+  const formik = useFormik<[@EntityName@]Create>({
+    initialValues: {
+      [@#fieldsCreate@]
+      [@fieldName@][@#isTypeOption@]Code[@/isTypeOption@]: [@#isTypeOption@]""[@/isTypeOption@][@#isTypeText@]""[@/isTypeText@][@#isTypeDate@]null[@/isTypeDate@],
+      [@/fieldsCreate@]
+    },
+    onSubmit: (values: [@EntityName@]Create) => {
+      if ([@parentEntityId@]) {
+        create[@EntityName@](parseInt([@parentEntityId@]), values).then((value) => {
+          history.push(
+            `/[@parent_entity_name_dash@]/${value.[@parentEntityId@]}/[@entity_name_dash@]/${value.[@entityId@]}/detail`
+          );
+        });
+      }
+    },
+    validate: (values) => {
+      const errors: {
+        [@#fieldsCreate@]
+        [@#isFieldRequired@]
+        [@fieldName@][@#isTypeOption@]Code[@/isTypeOption@]?: string;
+        [@/isFieldRequired@]
+        [@/fieldsCreate@]
+      } = {};
+      [@#fieldsCreate@]
+      [@#isFieldRequired@]
+      if (!values.[@fieldName@][@#isTypeOption@]Code[@/isTypeOption@]) {
+        errors.[@fieldName@][@#isTypeOption@]Code[@/isTypeOption@] = t("validation.notEmpty");
+      }
+      [@/isFieldRequired@]
+      [@/fieldsCreate@]
+      
+      // TODO вызов должен быть не из formik.validate, а из formik.handleChange
+      updateQueryString(values);
+      
+      return errors;
+    },
+  });
+
+  // TODO переместить на системный уровень
+  function updateQueryString(values) {
+    let query = queryString.stringify(values);
+    history.replace(`?${query}`);
+  }
+
+  return (
+    <>
+      <Form id="form-create" onSubmit={formik.handleSubmit} ref={formRef}>
+        
+        [@#fieldsCreate@]
+        [@>FieldTemplate.mustache@]
+        [@/fieldsCreate@]
+        
+      </Form>
+    </>
+  );
+};
+
+export default [@EntityName@]CreatePage;

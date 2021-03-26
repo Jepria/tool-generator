@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Defaults to generate crud client-react code from mustache sources only.
@@ -87,6 +89,7 @@ public class Main {
       String templateRootMst = null;
       String partialsRootMst = null;
       String outputRoot = null;
+      String entityName = null;
       
       // read cmd args
       for (int i = 0; i < argList.size(); i++) {
@@ -105,14 +108,18 @@ public class Main {
           i++;
           partialsRootMst = argList.get(i);
         } else if (argList.get(i).equals("--output-root") && i < argList.size() - 1) {
-          // absolute path to the ouptput project root
+          // absolute path to the output project root
           i++;
           outputRoot = argList.get(i);
+        } else if (argList.get(i).equals("--entity-name") && i < argList.size() - 1) {
+          // target entity name
+          i++;
+          entityName = argList.get(i);
         }
       }
 
       try {
-        runner = new Runner(apiSpecPaths, templateRootMst, partialsRootMst, outputRoot);
+        runner = new Runner(apiSpecPaths, templateRootMst, partialsRootMst, outputRoot, entityName);
       } catch (Runner.PrepareException e) {
         for (String message : e.getMessages()) {
           out.println(message);
@@ -141,10 +148,6 @@ public class Main {
     final File outputRootDir;
 
     final String entity_name_dash;
-    final String entityName;
-    final String entityId;
-    final String EntityName;
-    final String entityname;
     
     public static class PrepareException extends Exception {
       private final List<String> messages;
@@ -161,7 +164,8 @@ public class Main {
     public Runner(List<String> apiSpecPaths,
                   String templateRootMstPath,
                   String partialsRootMstPath,
-                  String outputRootDirPath) throws PrepareException {
+                  String outputRootDirPath,
+                  String entity_name_dash) throws PrepareException {
 
       boolean failed = false;
       List<String> failMessages = new ArrayList<>();
@@ -242,6 +246,13 @@ public class Main {
           failMessages.add("Incorrect file path [" + outputRootDirPath + "]: resolve exception");
         }
       }
+
+      {
+        if (entity_name_dash == null || (!entity_name_dash.matches("[^/]+") && !entity_name_dash.matches("/[^/]+/[^/]+"))) {
+          failed = true;
+          failMessages.add("--entity-name argument is mandatory and must be like 'entity-name' or '/parent-entity-name/child-entity-name'");
+        }
+      }
       
       if (failed) {
         throw new PrepareException(failMessages);
@@ -253,21 +264,7 @@ public class Main {
       this.partialsRootMst = partialsRootMst;
       this.outputRootDir = outputRootDir;
 
-      this.entity_name_dash = apiSpec.getParentFile().getName();
-      this.entityName = undashize(entity_name_dash);
-      this.entityId = entityName + "Id";
-      this.EntityName = capitalize(entityName);
-      this.entityname = dashize(entityName).replaceAll("-", "");
-
-      { // log everything
-        out.println("Spell-check:");
-        out.println("  * entity-name: " + entity_name_dash);
-        out.println("  *  entityName: " + entityName);
-        out.println("  *    entityId: " + entityId);
-        out.println("  *  EntityName: " + EntityName);
-        out.println("  *  entityname: " + entityname);
-      }
-      
+      this.entity_name_dash = entity_name_dash;
     }
 
     @Override
@@ -281,18 +278,75 @@ public class Main {
         throw new RuntimeException(e);
       }
 
-      Map<String, Object> m = TemplateFactory.createDataForTemplate(methods,
-              entityName, entityId, EntityName, entity_name_dash, entityname);
+      final Map<String, Object> m;
+      final Resource templateRootResource;
+      final File outputRootDir0;
+      
+      if (!entity_name_dash.contains("/")) {
+        String entityName = undashize(entity_name_dash);
+        String entityId = entityName + "Id";
+        String EntityName = capitalize(entityName);
+        String entityname = dashize(entityName).replaceAll("-", "");
 
-      Resource templateRootResource = templateRootMst != null ? new Resource.PathResourceImpl(templateRootMst.toPath()) :
-              Resource.fromJarResourceRoot("/mustache-templates/client-react/crud/ROOT");
+        { // log everything
+          out.println("Spell-check:");
+          out.println("  * entity-name: " + entity_name_dash);
+          out.println("  *  entityName: " + entityName);
+          out.println("  *    entityId: " + entityId);
+          out.println("  *  EntityName: " + EntityName);
+          out.println("  *  entityname: " + entityname);
+        }
+
+        m = TemplateFactory.createDataForEntityTemplate(methods,
+                entityName, entityId, EntityName, entity_name_dash, entityname);
+        templateRootResource = templateRootMst != null ? new Resource.PathResourceImpl(templateRootMst.toPath()) :
+                Resource.fromJarResourceRoot("/mustache-templates/client-react/crud/ROOT");
+        outputRootDir0 = outputRootDir;
+        
+      } else {
+
+        Matcher matcher = Pattern.compile("/([^/]+)/([^/]+)").matcher(entity_name_dash);
+        if (!matcher.matches()) {
+          throw new RuntimeException("The entity_name_dash must match the regex /([^/]+)/([^/]+)");
+        }
+        
+        String parent_entity_name_dash = matcher.group(1);
+        String entity_name_dash0 = matcher.group(2);
+        
+        String entityName = undashize(entity_name_dash0);
+        String entityId = entityName + "Id";
+        String EntityName = capitalize(entityName);
+        String entityname = dashize(entityName).replaceAll("-", "");
+
+        String parentEntityName = undashize(parent_entity_name_dash);
+        String parentEntityId = parentEntityName + "Id";
+        
+        { // log everything
+          out.println("Spell-check:");
+          out.println("  * parent-entity-name: " + parent_entity_name_dash);
+          out.println("  *   parentEntityName: " + parentEntityName);
+          out.println("  *     parentEntityId: " + parentEntityId);
+          out.println("  *        entity-name: " + entity_name_dash0);
+          out.println("  *         entityName: " + entityName);
+          out.println("  *           entityId: " + entityId);
+          out.println("  *         EntityName: " + EntityName);
+          out.println("  *         entityname: " + entityname);
+        }
+
+        m = TemplateFactory.createDataForSubEntityTemplate(methods,
+                parentEntityName, parentEntityId, parent_entity_name_dash,
+                entityName, entityId, EntityName, entity_name_dash0, entityname);
+        templateRootResource = templateRootMst != null ? new Resource.PathResourceImpl(templateRootMst.toPath()) :
+                Resource.fromJarResourceRoot("/mustache-templates/client-react/dependent-module/ROOT");
+        outputRootDir0 = new File(outputRootDir, "src/features");
+      }
+      
       Resource partialsRootResource = partialsRootMst != null ? new Resource.PathResourceImpl(partialsRootMst.toPath()) :
               Resource.fromJarResourceRoot("/mustache-templates/client-react/partials");
-      
       Evaluator ev = new Evaluator(partialsRootResource);
       
       try {
-        ev.evaluateTemplateTree(templateRootResource, outputRootDir, m);
+        ev.evaluateTemplateTree(templateRootResource, outputRootDir0, m);
       } catch (IOException e) {
         throw new RuntimeException(e);
       }

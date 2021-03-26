@@ -1,0 +1,55 @@
+import React, { useRef } from "react";
+import { Route, useRouteMatch, useHistory, useParams } from "react-router-dom";
+import [@EntityName@]ListPage from "./pages/[@EntityName@]ListPage";
+import [@EntityName@]DetailPage from "./pages/[@EntityName@]DetailPage";
+import [@EntityName@]CreatePage from "./pages/[@EntityName@]CreatePage";
+import [@EntityName@]Toolbar from "./components/[@EntityName@]Toolbar";
+import { Panel, Tab, TabPanel } from "@jfront/ui-core";
+import { useTranslation } from "react-i18next";
+
+function [@EntityName@]Route() {
+  const { [@parentEntityId@] } = useParams();
+  const { path } = useRouteMatch();
+  const history = useHistory();
+  const { t } = useTranslation();
+  let formRef = useRef<HTMLFormElement>(null);
+
+  return (
+    <Panel>
+      <Panel.Header>
+        <TabPanel>
+          <Tab
+            selected={false}
+            onClick={() => {
+              history.push(`/[@parent_entity_name_dash@]/${[@parentEntityId@]}/detail`);
+            }}
+          >
+            {t("[@parentEntityName@].header")}
+          </Tab>
+          <Tab
+            selected={true}
+            onClick={() => {
+              history.push(`/[@parent_entity_name_dash@]/${[@parentEntityId@]}/[@entity_name_dash@]/list`);
+            }}
+          >
+            {t("[@entityName@].header")}
+          </Tab>
+        </TabPanel>
+        <[@EntityName@]Toolbar />
+      </Panel.Header>
+      <Panel.Content>
+        <Route path={`${path}/list`} exact>
+          <[@EntityName@]ListPage />
+        </Route>
+        <Route path={`${path}/:[@entityId@]/detail`}>
+          <[@EntityName@]DetailPage />
+        </Route>
+        <Route path={`${path}/create`} exact>
+          <[@EntityName@]CreatePage formRef={formRef}/>
+        </Route>
+      </Panel.Content>
+    </Panel>
+  );
+}
+
+export default [@EntityName@]Route;

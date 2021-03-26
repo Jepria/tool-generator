@@ -1,0 +1,52 @@
+import { ConnectorCrud } from "@jfront/core-rest";
+import axios, { AxiosInstance } from "axios";
+import { API_PATH } from "../../../config";
+import { [@EntityName@], [@EntityName@]Create } from "./[@EntityName@]Types";
+
+class [@EntityName@]CrudApi extends ConnectorCrud<[@EntityName@], string, [@EntityName@]Create> {
+  constructor(baseUrl: string, withCrudentials = false, axiosInstance?: AxiosInstance) {
+    super(baseUrl, withCrudentials, axiosInstance);
+  }
+
+  create[@EntityName@] = (
+    [@parentEntityId@]: number,
+    [@entityName@]Create: [@EntityName@]Create
+  ): Promise<[@EntityName@]> => {
+    const url = `${this.baseUrl}/[@parent_entity_name_dash@]/${[@parentEntityId@]}/[@entity_name_dash@]`;
+
+    return new Promise<[@EntityName@]>((resolve, reject) => {
+      this.getAxios()
+        .post(url, [@entityName@]Create, {
+          headers: {
+            Accept: "application/json;charset=utf-8",
+            "Content-Type": "application/json;charset=utf-8",
+          },
+        })
+        .then((response) => {
+          if (response.status === 201) {
+            let location: string = response.headers["location"];
+            axios
+              .get(location, {
+                headers: {
+                  Accept: "application/json;charset=utf-8",
+                  "Content-Type": "application/json;charset=utf-8",
+                },
+              })
+              .then((response) => {
+                if (200 === response.status) {
+                  resolve(response.data);
+                } else {
+                  reject(response);
+                }
+              })
+              .catch((error) => reject(error));
+          } else {
+            reject(response);
+          }
+        })
+        .catch((error) => reject(error));
+    });
+  };
+}
+
+export const [@parentEntityName@]CrudApi = new [@EntityName@]CrudApi(API_PATH + "/[@parent_entity_name_dash@]", true, axios);

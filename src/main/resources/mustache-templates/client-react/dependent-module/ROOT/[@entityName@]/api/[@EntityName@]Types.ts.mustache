@@ -1,0 +1,46 @@
+//TODO interface to type?
+export interface [@EntityName@] {
+  [@parentEntityId@]: number;
+  [@entityId@]: number;
+  [@#fieldsDetail@]
+  [@#isTypeOption@]
+  [@fieldName@]: {
+    name: string;
+    value: string;
+  };
+  [@/isTypeOption@]
+  [@#isTypeInt@]
+  [@fieldName@]: number;
+  [@/isTypeInt@]
+  [@#isTypeText@]
+  [@fieldName@]: string;
+  [@/isTypeText@]
+  [@#isTypeDate@]
+  [@fieldName@]: Date;
+  [@/isTypeDate@]
+  [@/fieldsDetail@]
+}
+
+export interface [@EntityName@]Create {
+  [@#fieldsCreate@]
+  [@#isTypeOption@]
+  [@fieldName@]Code: string;
+  [@/isTypeOption@]
+  [@#isTypeInt@]
+  [@fieldName@]: number;
+  [@/isTypeInt@]
+  [@#isTypeText@]
+  [@fieldName@]: string;
+  [@/isTypeText@]
+  [@#isTypeDate@]
+  [@fieldName@]: Date;
+  [@/isTypeDate@]
+  [@/fieldsCreate@]
+}
+
+[@#allOptions@]
+export interface [@FieldName@]Option {
+  name: string;
+  value: string;
+}
+[@/allOptions@]

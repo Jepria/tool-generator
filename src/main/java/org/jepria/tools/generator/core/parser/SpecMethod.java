@@ -60,6 +60,8 @@ public interface SpecMethod {
    */
   Map<String, Object> responseBodySchema();
 
+  String operationId();
+  
   default String asString() {
     StringBuilder sb = new StringBuilder();
     sb.append(httpMethod());

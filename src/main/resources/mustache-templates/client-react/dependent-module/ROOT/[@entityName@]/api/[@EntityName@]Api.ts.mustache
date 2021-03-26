@@ -1,0 +1,129 @@
+import axios from "axios";
+import { API_PATH } from "../../../config";
+import {
+  [@EntityName@],
+  [@EntityName@]Create,
+  [@#allOptions@]
+  [@FieldName@]Option,
+  [@/allOptions@]
+} from "./[@EntityName@]Types";
+
+const API_URL = API_PATH;
+const withCredentials = false;
+
+export const find[@EntityName@] = ([@parentEntityId@]: number): Promise<[@EntityName@][]> => {
+  const url = `${API_URL}/[@parent_entity_name_dash@]/${[@parentEntityId@]}/[@entity_name_dash@]`;
+  axios.defaults.withCredentials = withCredentials;
+  return axios
+    .get(url)
+    .then((response) => response.data)
+    .catch((reason) => {
+      return Promise.reject(reason);
+    });
+};
+
+export const create[@EntityName@] = (
+  [@parentEntityId@]: number,
+  [@entityName@]Create: [@EntityName@]Create
+): Promise<[@EntityName@]> => {
+  const url = `${API_URL}/[@parent_entity_name_dash@]/${[@parentEntityId@]}/[@entity_name_dash@]`;
+  axios.defaults.withCredentials = withCredentials;
+
+  return new Promise<[@EntityName@]>((resolve, reject) => {
+    axios
+      .post(url, [@entityName@]Create, {
+        headers: {
+          Accept: "application/json;charset=utf-8",
+          "Content-Type": "application/json;charset=utf-8",
+        },
+      })
+      .then((response) => {
+        if (response.status === 201) {
+          let location: string = response.headers["location"];
+          axios
+            .get(location, {
+              headers: {
+                Accept: "application/json;charset=utf-8",
+                "Content-Type": "application/json;charset=utf-8",
+              },
+            })
+            .then((response) => {
+              if (200 === response.status) {
+                resolve(response.data);
+              } else {
+                reject(response);
+              }
+            })
+            .catch((error) => reject(error));
+        } else {
+          reject(response);
+        }
+      })
+      .catch((error) => reject(error));
+  });
+};
+
+export const get[@EntityName@] = (
+  [@parentEntityId@]: number,
+  [@entityId@]: string
+): Promise<[@EntityName@]> => {
+  const url = `${API_URL}/[@parent_entity_name_dash@]/${[@parentEntityId@]}/[@entity_name_dash@]/${[@entityId@]}`;
+  axios.defaults.withCredentials = withCredentials;
+
+  return axios
+    .get(url, {
+      headers: {
+        Accept: "application/json;charset=utf-8",
+        "Content-Type": "application/json;charset=utf-8",
+      },
+    })
+    .then((response) => response.data)
+    .catch((reason) => {
+      return Promise.reject(reason);
+    });
+};
+
+export const delete[@EntityName@] = (
+  [@parentEntityId@]: number,
+  [@entityId@]: number
+): Promise<void> => {
+  const url = `${API_URL}/[@parent_entity_name_dash@]/${[@parentEntityId@]}/[@entity_name_dash@]/${[@entityId@]}`;
+  axios.defaults.withCredentials = withCredentials;
+
+  return new Promise<void>((resolve, reject) => {
+    axios
+      .delete(url, {
+        headers: {
+          Accept: "application/json;charset=utf-8",
+          "Content-Type": "application/json;charset=utf-8",
+        },
+      })
+      .then((response) => {
+        if (200 === response.status) {
+          resolve();
+        } else {
+          reject(response);
+        }
+      })
+      .catch((error) => reject(error));
+  });
+};
+
+[@#allOptions@]
+export const get[@FieldName@]Options = (): Promise<[@FieldName@]Option[]> => {
+  const url = `${API_URL}/[@parent_entity_name_dash@]/option/[@field_name_dash@]`;
+  axios.defaults.withCredentials = withCredentials;
+
+  return axios
+    .get(url, {
+      headers: {
+        Accept: "application/json;charset=utf-8",
+        "Content-Type": "application/json;charset=utf-8",
+      },
+    })
+    .then((response) => response.data)
+    .catch((reason) => {
+      return Promise.reject(reason);
+    });
+};
+[@/allOptions@]

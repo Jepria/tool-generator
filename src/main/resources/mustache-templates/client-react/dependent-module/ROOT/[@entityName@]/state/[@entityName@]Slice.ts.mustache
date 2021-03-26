@@ -1,0 +1,52 @@
+import { createSlice } from "@reduxjs/toolkit";
+import { [@EntityName@] } from "../api/[@EntityName@]Types";
+import { AppThunk, RootState } from "../../../app/store";
+
+interface [@EntityName@]State {
+  currentRecord: [@EntityName@];
+  error: string;
+  saveOnCreate[@EntityName@]: boolean;
+}
+
+const initialState: [@EntityName@]State = {
+  currentRecord: null,
+  error: null,
+  saveOnCreate[@EntityName@]: false,
+};
+
+export const [@entityName@]Slice = createSlice({
+  name: "[@entityName@]",
+  initialState,
+  reducers: {
+    setSaveOnCreate[@EntityName@](state, action) {
+      state.saveOnCreate[@EntityName@] = action.payload;
+    },
+    setCurrent[@EntityName@](state, action) {
+      state.currentRecord = action.payload;
+    },
+    getFeatureError(state, action) {
+      state.error = action.payload;
+      state.currentRecord = null;
+    },
+  },
+});
+
+export const { setCurrent[@EntityName@] } = [@entityName@]Slice.actions;
+export const { getFeatureError } = [@entityName@]Slice.actions;
+export const { setSaveOnCreate[@EntityName@] } = [@entityName@]Slice.actions;
+
+export const select[@EntityName@] = (state: RootState) =>
+  state.[@entityName@].currentRecord; 
+export const selectError = (state: RootState) => state.[@entityName@].error;
+export const selectSaveOnCreate[@EntityName@] = (state: RootState) =>
+  state.[@entityName@].saveOnCreate[@EntityName@];
+
+export const submitSaveOnCreate[@EntityName@] = (): AppThunk => async (dispatch) => {
+  dispatch(setSaveOnCreate[@EntityName@](true));
+};
+
+export const submitSavedOnCreate[@EntityName@] = (): AppThunk => async (dispatch) => {
+  dispatch(setSaveOnCreate[@EntityName@](false));
+};
+
+export default [@entityName@]Slice.reducer;

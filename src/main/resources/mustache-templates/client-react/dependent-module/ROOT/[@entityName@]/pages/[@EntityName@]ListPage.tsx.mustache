@@ -1,0 +1,59 @@
+import React, { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { useHistory, useLocation, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { Grid } from "@jfront/ui-core";
+import { [@EntityName@] } from "../api/[@EntityName@]Types";
+import { find[@EntityName@] } from "../api/[@EntityName@]Api";
+import { setCurrent[@EntityName@] } from "../state/[@entityName@]Slice";
+
+const [@EntityName@]ListPage = () => {
+  //----------------
+  const location = useLocation();
+  const history = useHistory();
+  const { t } = useTranslation();
+  const dispatch = useDispatch();
+  //----------------
+  const [records, setRecords] = useState<[@EntityName@][]>();
+  let { [@parentEntityId@] } = useParams<any>();
+
+  useEffect(() => {
+    if ([@parentEntityId@]) {
+      find[@EntityName@](parseInt([@parentEntityId@])).then((processes: [@EntityName@][]) => {
+        setRecords(processes);
+      });
+    }
+  }, [location]);
+
+  return (
+    <>
+      <Grid
+        id="table"
+        columns={[
+          [@#fieldsList@]
+          {
+            Header: t("[@entityName@].fields.[@fieldName@]"),
+            [@#isTypeOption@]id: "[@fieldName@]",[@/isTypeOption@]
+            accessor: "[@fieldName@][@#isTypeOption@].name[@/isTypeOption@]",
+          },
+          [@/fieldsList@]
+        ]}
+        data={records ? records : []} //todo: bug in library
+        onSelection={(selected) => {
+          if (selected.length === 1) {
+            dispatch(setCurrent[@EntityName@](selected[0]));
+          } else {
+            dispatch(setCurrent[@EntityName@](undefined));
+          }
+        }}
+        onDoubleClick={([@entityName@]) => {
+          history.push(
+            `/[@parent_entity_name_dash@]/${[@entityName@].[@parentEntityId@]}/[@entity_name_dash@]/${[@entityName@].[@entityId@]}/detail`
+          );
+        }}
+      />
+    </>
+  );
+};
+
+export default [@EntityName@]ListPage;

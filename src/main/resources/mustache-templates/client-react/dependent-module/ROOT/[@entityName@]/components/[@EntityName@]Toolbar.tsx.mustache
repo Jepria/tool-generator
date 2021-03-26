@@ -1,0 +1,76 @@
+import React from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
+import { useHistory, useParams } from "react-router-dom";
+import {
+  Toolbar,
+  ToolbarButtonBase,
+  ToolbarButtonCreate,
+  ToolbarButtonDelete,
+  ToolbarButtonSave,
+  ToolbarButtonView,
+  ToolbarSplitter,
+} from "@jfront/ui-core";
+import { select[@EntityName@], submitSaveOnCreate[@EntityName@] } from "../state/[@entityName@]Slice";
+import { delete[@EntityName@] } from "../api/[@EntityName@]Api";
+import { useWorkstate, Workstates } from "../../../app/common/useWorkstate";
+
+const [@EntityName@]Toolbar = () => {
+  //----------------
+  const { t } = useTranslation();
+  const history = useHistory();
+  const dispatch = useDispatch();
+  const { [@parentEntityId@] } = useParams<any>();
+  //----------------
+  const state: Workstates = useWorkstate(history.location.pathname);
+  const current[@EntityName@] = useSelector(select[@EntityName@]);
+
+  return (
+    <Toolbar>
+      <ToolbarButtonCreate
+        disabled={Workstates.Create === state}
+        onClick={() => history.push(`/[@parent_entity_name_dash@]/${[@parentEntityId@]}/[@entity_name_dash@]/create`)}
+      />
+      <ToolbarButtonSave
+        disabled={Workstates.Create !== state}
+        onClick={() => {
+          if (Workstates.Create === state) {
+            dispatch(submitSaveOnCreate[@EntityName@]());
+          }
+        }}
+      />
+      <ToolbarButtonDelete
+        disabled={!current[@EntityName@]}
+        onClick={() => {
+          if (current[@EntityName@].[@parentEntityId@] && current[@EntityName@].[@entityId@]) {
+            delete[@EntityName@](
+              parseInt(current[@EntityName@].[@parentEntityId@].toString()),
+              parseInt(current[@EntityName@].[@entityId@] as any)
+            ).then(() => {
+              history.push(`/[@parent_entity_name_dash@]/${[@parentEntityId@]}/[@entity_name_dash@]/list`);
+            });
+          }
+        }}
+      />
+      <ToolbarButtonView
+        disabled={!current[@EntityName@] || Workstates.Detail === state}
+        onClick={() =>
+          history.push(
+            `/[@parent_entity_name_dash@]/${current[@EntityName@].[@parentEntityId@]}/[@entity_name_dash@]/${current[@EntityName@]?.[@entityId@]}/detail`
+          )
+        }
+      />
+      <ToolbarSplitter />
+      <ToolbarButtonBase
+        disabled={Workstates.List === state}
+        onClick={() => {
+          history.push(`/[@parent_entity_name_dash@]/${current[@EntityName@].[@parentEntityId@]}/[@entity_name_dash@]/list`);
+        }}
+      >
+        {t("toolbar.list")}
+      </ToolbarButtonBase>
+    </Toolbar>
+  );
+};
+
+export default [@EntityName@]Toolbar;

@@ -1,0 +1,67 @@
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useDispatch, useSelector } from "react-redux";
+import { Form } from "@jfront/ui-core";
+import { get[@EntityName@] } from "../api/[@EntityName@]Api";
+import { setCurrent[@EntityName@], select[@EntityName@] } from "../state/[@entityName@]Slice";
+import { RootState } from "../../../app/store";
+
+const [@EntityName@]DetailPage = () => {
+  //----------------
+  const { t } = useTranslation();
+  const dispatch = useDispatch();
+  //----------------
+  let { [@parentEntityId@], [@entityId@] } = useParams<any>();
+
+  const currentRecord = useSelector(select[@EntityName@]);
+
+  // const currentRecord = useSelector(select[@EntityName@]);
+
+  useEffect(() => {
+    if ([@parentEntityId@] && [@entityId@]) {
+      get[@EntityName@](parseInt([@parentEntityId@]), [@entityId@]).then(([@entityName@]) => {
+        dispatch(setCurrent[@EntityName@]([@entityName@]));
+      });
+    }
+  }, []);
+
+  return (
+    <>
+      <Form>
+        
+        [@#fieldsDetail@]
+        [@#isTypeOption@]
+        <Form.Field>
+          <Form.Label>{t("[@entityName@].fields.[@fieldName@]")}:</Form.Label>
+          <Form.Label style={{ width: "350px", justifyContent: "flex-start" }}>
+            {currentRecord?.[@fieldName@]?.name}
+          </Form.Label>
+        </Form.Field>
+        [@/isTypeOption@]
+        
+        [@#isTypeText@]
+        <Form.Field>
+          <Form.Label>{t("[@entityName@].fields.[@fieldName@]")}:</Form.Label>
+          <Form.Label style={{ width: "350px", justifyContent: "flex-start" }}>
+            {currentRecord?.[@fieldName@]}
+          </Form.Label>
+        </Form.Field>
+        [@/isTypeText@]
+        
+        [@#isTypeDate@]
+        <Form.Field>
+          <Form.Label>{t("[@entityName@].fields.[@fieldName@]")}:</Form.Label>
+          <Form.Label style={{ width: "350px", justifyContent: "flex-start" }}>
+            {currentRecord ? currentRecord?.[@fieldName@] ? new Date(currentRecord?.[@fieldName@]).toLocaleDateString() : "" : null}
+          </Form.Label>
+        </Form.Field>
+        [@/isTypeDate@]
+        [@/fieldsDetail@]
+        
+      </Form>
+    </>
+  );
+};
+
+export default [@EntityName@]DetailPage;

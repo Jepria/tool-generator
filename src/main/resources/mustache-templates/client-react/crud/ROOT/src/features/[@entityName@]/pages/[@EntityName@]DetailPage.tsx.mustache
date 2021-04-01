@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { Form } from "@jfront/ui-core";
-import { getRecordById } from "../state/[@EntityName@]CrudSlice";
+import { getRecordById } from "../state/[@EntityName@]Slice";
 import { RootState } from "../../../app/store";
 
 const [@EntityName@]DetailPage = () => {
@@ -12,7 +12,7 @@ const [@EntityName@]DetailPage = () => {
   const dispatch = useDispatch();
   //----------------
 
-  let { [@entityId@]: [@entityId@] } = useParams();
+  let { [@entityId@] } = useParams();
   const { currentRecord, error } = useSelector(
     (state: RootState) => state.[@entityName@].[@entityName@]CrudSlice
   );

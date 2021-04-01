@@ -1,7 +1,7 @@
-import { combineReducers } from "@reduxjs/toolkit";
-import { EntityState, SearchState } from "@jfront/core-redux-thunk";
 import { [@EntityName@], [@EntityName@]SearchTemplate } from "../api/[@EntityName@]Types";
-import { initialEntityState, reducer as crudReducer } from "./[@EntityName@]CrudSlice";
+import { EntityState, SearchState } from "@jfront/core-redux-thunk";
+import { combineReducers } from "@reduxjs/toolkit";
+import { initialEntityState, reducer as crudReducer } from "./[@EntityName@]Slice";
 import { initialSearchState, reducer as searchReducer } from "./[@EntityName@]SearchSlice";
 
 export interface [@EntityName@]State {

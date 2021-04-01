@@ -3,7 +3,7 @@ import { ConnectorCrud } from "@jfront/core-rest";
 import { API_PATH } from "../../../config";
 import { [@EntityName@], [@EntityName@]Create, [@EntityName@]Update } from "./[@EntityName@]Types";
 
-class [@EntityName@]CrudApi extends ConnectorCrud<[@EntityName@], string, [@EntityName@]Create, [@EntityName@]Update> {
+class [@EntityName@]CrudApi extends ConnectorCrud<[@EntityName@], number, [@EntityName@]Create, [@EntityName@]Update> {
   constructor(
     baseUrl: string,
     withCrudentials = false,

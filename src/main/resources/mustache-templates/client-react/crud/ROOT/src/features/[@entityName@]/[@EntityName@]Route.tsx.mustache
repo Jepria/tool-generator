@@ -16,7 +16,7 @@ function [@EntityName@]Route() {
   const history = useHistory();
   const { t } = useTranslation();
   const { currentRecord } = useSelector((state: RootState) => state.[@entityName@].[@entityName@]CrudSlice);
-  const formRef = useRef<HTMLFormElement>(null);
+  let formRef = useRef<HTMLFormElement>(null);
 
   return (
     <Panel>

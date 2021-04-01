@@ -20,6 +20,11 @@ export interface [@EntityName@] {
   [@/fieldsDetail@]
 }
 
+export type ResultSet = {
+  resultsetSize: number
+  data?: [@EntityName@][]
+}
+
 export interface [@EntityName@]Create {
   [@#fieldsCreate@]
   [@#isTypeOption@]

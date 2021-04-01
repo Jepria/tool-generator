@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { useHistory, useParams } from "react-router-dom";
 import { useFormik } from "formik";
 import { useTranslation } from "react-i18next";
-import { useDispatch, useSelector } from "react-redux";
-import queryString from "query-string";
-import { ComboBox, ComboBoxItem, Form, DatePicker, NumberInput, TextInput } from "@jfront/ui-core";
-import { RootState } from "../../../app/store";
-import { getRecordById } from "../state/[@EntityName@]CrudSlice";
+import { useSelector, useDispatch } from "react-redux";
+import { useHistory, useParams } from "react-router-dom";
+import { Form } from "@jfront/ui-core";
+import { ComboBox, ComboBoxItem, DatePicker, NumberInput, TextInput } from "@jfront/ui-core";
+import { RootState, useAppDispatch } from "../../../app/store";
+import { getRecordById, updateRecord } from "../state/[@EntityName@]Slice";
+
 import {
   [@#fieldsEdit@]
   [@#isTypeOption@][@FieldName@]Option,[@/isTypeOption@]
@@ -21,16 +22,16 @@ import {
 
 const [@EntityName@]EditPage = ({ formRef }) => {
   //----------------
-  const { t } = useTranslation();
   const history = useHistory();
-  const dispatch = useDispatch();
+  const { t } = useTranslation();
+  const dispatch = useAppDispatch();
   //----------------
 
   [@#fieldsEdit@]
   [@#isTypeOption@]const [[@fieldName@]Options, set[@FieldName@]Options] = useState<[@FieldName@]Option[]>();[@/isTypeOption@]
   [@/fieldsEdit@]
   
-  let { [@entityId@]: [@entityId@] } = useParams();
+  let { [@entityId@] } = useParams();
   const { currentRecord } = useSelector((state: RootState) => state.[@entityName@].[@entityName@]CrudSlice);
 
   useEffect(() => {
@@ -55,9 +56,10 @@ const [@EntityName@]EditPage = ({ formRef }) => {
     },
     onSubmit: (values: [@EntityName@]Update) => {
       if ([@entityId@]) {
-        [@entityName@]CrudApi.update([@entityId@].toString(), values).then(() => {
-          history.push(`/[@entity_name_dash@]/${[@entityId@]}/detail`);
-        });
+        dispatch(updateRecord({ primaryKey: [@entityId@], values: values }))
+          .then(() => {
+            history.push(`/[@entity_name_dash@]/${[@entityId@]}/detail`);
+          });
       }
     },
     validate: (values) => {
@@ -76,23 +78,14 @@ const [@EntityName@]EditPage = ({ formRef }) => {
       [@/isFieldRequired@]
       [@/fieldsEdit@]
       
-      // TODO вызов должен быть не из formik.validate, а из formik.handleChange
-      updateQueryString(values);
-      
       return errors;
     },
     enableReinitialize: true,
   });
 
-  // TODO переместить на системный уровень
-  function updateQueryString(values) {
-    let query = queryString.stringify(values);
-    history.replace(`?${query}`);
-  }
-
   return (
     <>
-      <Form id="form-edit" onSubmit={formik.handleSubmit} ref={formRef}>
+      <Form id="edit-form" onSubmit={formik.handleSubmit} ref={formRef}>
         
         [@#fieldsEdit@]
         [@>FieldTemplate.mustache@]

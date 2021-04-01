@@ -2,14 +2,15 @@ import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import { useFormik } from "formik";
 import { useTranslation } from "react-i18next";
-import queryString from "query-string";
-import { ComboBox, ComboBoxItem, Form, DatePicker, NumberInput, TextInput} from "@jfront/ui-core";
+import { Form } from "@jfront/ui-core";
+import { ComboBox, ComboBoxItem, DatePicker, NumberInput, TextInput} from "@jfront/ui-core";
+import { useAppDispatch } from "../../../app/store";
+import { createRecord } from "../state/[@EntityName@]Slice";
 import {
   [@#fieldsCreate@]
   [@#isTypeOption@][@FieldName@]Option,[@/isTypeOption@]
   [@/fieldsCreate@]
   [@EntityName@], [@EntityName@]Create } from "../api/[@EntityName@]Types";
-import { [@entityName@]CrudApi } from "../api/[@EntityName@]CrudApi";
 import {
   [@#fieldsCreate@]
   [@#isTypeOption@]get[@FieldName@]Options,[@/isTypeOption@]
@@ -18,8 +19,9 @@ import {
 
 const [@EntityName@]CreatePage = ({ formRef }) => {
   //----------------
-  const { t } = useTranslation();
   const history = useHistory();
+  const { t } = useTranslation();
+  const dispatch = useAppDispatch();
   //----------------
 
   [@#fieldsCreate@]
@@ -43,9 +45,10 @@ const [@EntityName@]CreatePage = ({ formRef }) => {
       [@/fieldsCreate@]
     },
     onSubmit: (values: [@EntityName@]Create) => {
-      [@entityName@]CrudApi.create(values).then(([@entityName@]: [@EntityName@]) => {
-        history.push(`/[@entity_name_dash@]/${[@entityName@].[@entityId@]}/detail`);
-      });
+      dispatch(createRecord({ values: values }))
+        .then(([@entityName@]) => {
+          history.push(`/[@entity_name_dash@]/${[@entityName@].[@entityId@]}/detail`);
+        });
     },
     validate: (values) => {
       const errors: {
@@ -63,22 +66,13 @@ const [@EntityName@]CreatePage = ({ formRef }) => {
       [@/isFieldRequired@]
       [@/fieldsCreate@]
       
-      // TODO вызов должен быть не из formik.validate, а из formik.handleChange
-      updateQueryString(values);
-      
       return errors;
     },
   });
 
-  // TODO переместить на системный уровень
-  function updateQueryString(values) {
-    let query = queryString.stringify(values);
-    history.replace(`?${query}`);
-  }
-
   return (
     <>
-      <Form id="form-create" onSubmit={formik.handleSubmit} ref={formRef}>
+      <Form id="create-form" onSubmit={formik.handleSubmit} ref={formRef}>
         
         [@#fieldsCreate@]
         [@>FieldTemplate.mustache@]

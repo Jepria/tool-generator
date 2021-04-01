@@ -1,7 +1,11 @@
 import axios, { AxiosInstance } from "axios";
-import { ConnectorSearch } from "@jfront/core-rest";
+import {
+  buildError,
+  ConnectorSearch,
+  handleAxiosError,
+} from "@jfront/core-rest";
 import { API_PATH } from "../../../config";
-import { [@EntityName@], [@EntityName@]SearchTemplate } from "./[@EntityName@]Types";
+import { [@EntityName@], [@EntityName@]SearchTemplate, ResultSet } from "./[@EntityName@]Types";
 
 class [@EntityName@]SearchApi extends ConnectorSearch<[@EntityName@], [@EntityName@]SearchTemplate> {
   constructor(
@@ -11,6 +15,28 @@ class [@EntityName@]SearchApi extends ConnectorSearch<[@EntityName@], [@EntityNa
   ) {
     super(baseUrl, withCrudentials, axiosInstance);
   }
+
+  querySearch = (query: string) => {
+    return new Promise<ResultSet>((resolve, reject) => {
+      this.getAxios()
+        .get(this.baseUrl + `/search?${query}`, {
+          headers: {
+            Accept: "application/json;charset=utf-8",
+            "Content-Type": "application/json;charset=utf-8",
+            "Cache-Control": "no-cache",
+          },
+        })
+        .then((response) => {
+          if (response.status === 200) {
+            resolve(response.data);
+          } else {
+            reject(buildError(response));
+          }
+        })
+        .catch((error) => reject(handleAxiosError(error)));
+    });
+  };
 }
 
 export const [@entityName@]SearchApi = new [@EntityName@]SearchApi(API_PATH + "/[@entity_name_dash@]", false, axios);
+

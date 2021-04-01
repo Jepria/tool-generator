@@ -9,17 +9,17 @@ function [@EntityName@]ModuleRoute() {
   const { t } = useTranslation();
   const { path } = useRouteMatch();
   const { isRoleLoading, isUserInRoles } = useContext(UserContext);
-  const [hasAccess, setHasAccess] = useState(true);
+  const [hasAccess, setHasAccess] = useState(false);
 
-  /*useEffect(() => {
-    isUserInRoles(["JrsEdit[@EntityName@]", "JrsEditAll[@EntityName@]", "JrsAssignResponsible[@EntityName@]"])
+  useEffect(() => {
+    isUserInRoles(["MRT_Role1", "MRT_Role2"])
       .then(setHasAccess)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); */
+  }, [])
 
   return (
     <>
-      {isRoleLoading && <Loader title="JepRiaShowcase" text={t("loadingRoles")} />}
+      {isRoleLoading && <Loader title="MRT_Application" text={t("loadingRoles")} />}
       {!isRoleLoading && !hasAccess && <Forbidden />}
       {!isRoleLoading && hasAccess && (
         <>

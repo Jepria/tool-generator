@@ -1,5 +1,5 @@
 import { createCrudSlice, EntityState } from "@jfront/core-redux-thunk";
-import { [@EntityName@] } from "../api/[@EntityName@]Types";
+import { [@EntityName@], [@EntityName@]Create, [@EntityName@]Update } from "../api/[@EntityName@]Types";
 import { [@entityName@]CrudApi } from "../api/[@EntityName@]CrudApi";
 
 export const initialEntityState: EntityState<[@EntityName@]> = {
@@ -9,7 +9,7 @@ export const initialEntityState: EntityState<[@EntityName@]> = {
   selectedRecords: [],
 };
 
-const entitySlice = createCrudSlice({
+const entitySlice = createCrudSlice<number, [@EntityName@], [@EntityName@]Create, [@EntityName@]Update>({
   name: "[@entityName@]Slice",
   initialState: initialEntityState,
   reducers: {},

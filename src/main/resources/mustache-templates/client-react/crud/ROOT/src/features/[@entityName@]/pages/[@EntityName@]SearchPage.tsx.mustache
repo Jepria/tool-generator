@@ -1,10 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useHistory } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
-import { useTranslation } from "react-i18next";
-import { useDispatch, useSelector } from "react-redux";
 import queryString from "query-string";
-import { ComboBox, ComboBoxItem, Form, DatePicker, NumberInput, TextInput } from "@jfront/ui-core";
+import { useTranslation } from "react-i18next";
+import { useHistory } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { Form } from "@jfront/ui-core";
+import { ComboBox, ComboBoxItem, DatePicker, NumberInput, TextInput } from "@jfront/ui-core";
 import {
   [@#fieldsSearch@]
   [@#isTypeOption@][@FieldName@]Option,[@/isTypeOption@]
@@ -15,13 +16,19 @@ import {
   [@#isTypeOption@]get[@FieldName@]Options,[@/isTypeOption@]
   [@/fieldsSearch@]
 } from "../api/[@EntityName@]Api";
+import { actions } from "../state/[@EntityName@]SearchSlice";
 import { [@EntityName@]State } from "../state/[@EntityName@]Reducer";
 
+const useQuery = () => {
+  return queryString.parse(window.location.search, {arrayFormat: 'bracket'})
+};
 
 const [@EntityName@]SearchPage = ({ formRef }) => {
   //----------------
   const { t } = useTranslation();
   const history = useHistory();
+  const dispatch = useDispatch();
+  const template = useQuery();
   //----------------
 
   [@#fieldsSearch@]
@@ -43,14 +50,21 @@ const [@EntityName@]SearchPage = ({ formRef }) => {
   [@/fieldsSearch@]
 
   const formik = useFormik<[@EntityName@]SearchTemplate>({
-    initialValues: searchRequest.template,
+    initialValues: {maxRowCount: 25, ...template, ...searchRequest.template},
     enableReinitialize: true,
     onSubmit: (values) => {
-      let query = queryString.stringify(values);
+      dispatch(
+        actions.setSearchTemplate({
+          searchTemplate: {
+            template: values,
+          },
+        })
+      );
+      let query = queryString.stringify(values, {arrayFormat: 'bracket'});
       if (query) {
         query = "&" + query;
       }
-      history.push(`/[@entity_name_dash@]/list/?pageSize=25&page=1${query}`);
+      history.push(`/[@entity_name_dash@]/list/?pageSize=25&page=1${encodeURI(query)}`);
     },
     validate: (values) => {
       const errors: {
@@ -60,30 +74,16 @@ const [@EntityName@]SearchPage = ({ formRef }) => {
         [@/isFieldRequired@]
         [@/fieldsSearch@]
       } = {};
-      [@#fieldsSearch@]
-      [@#isFieldRequired@]
-      if (!values.[@fieldName@][@#isTypeOption@]Code[@/isTypeOption@]) {
-        errors.[@fieldName@][@#isTypeOption@]Code[@/isTypeOption@] = t("validation.notEmpty");
-      }
-      [@/isFieldRequired@]
-      [@/fieldsSearch@]
-      
-      // TODO вызов должен быть не из formik.validate, а из formik.handleChange
-      updateQueryString(values);
-      
+
+      let query = queryString.stringify(values);
+      history.replace(`?${query}`);
       return errors;
     },
   });
 
-  // TODO переместить на системный уровень
-  function updateQueryString(values) {
-    let query = queryString.stringify(values);
-    history.replace(`?${query}`);
-  }
-
   return (
     <>
-      <Form id="form-search" onSubmit={formik.handleSubmit} ref={formRef}>
+      <Form onSubmit={formik.handleSubmit} ref={formRef}>
         
         [@#fieldsSearch@]
         [@>FieldTemplate.mustache@]

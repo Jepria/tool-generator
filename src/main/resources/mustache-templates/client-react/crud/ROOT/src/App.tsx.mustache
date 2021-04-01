@@ -2,9 +2,9 @@ import React, {Suspense, useContext, useEffect} from "react";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import [@EntityName@]ModuleRoute from "./features/[@entityName@]/[@EntityName@]ModuleRoute";
-import { UserPanel } from "@jfront/oauth-ui";
+import { UserPanel } from '@jfront/oauth-ui';
 import { UserContext } from "@jfront/oauth-user";
-import { Loader } from "@jfront/oauth-ui";
+import { Loader } from '@jfront/oauth-ui'
 
 function Main() {
   const { i18n, t } = useTranslation();
@@ -27,14 +27,14 @@ function Main() {
             </Route>
           </Switch>
         </BrowserRouter>}
-      {isUserLoading && <Loader title="JepRiaShowcase" text={t("loadingUser")} />}
+      {isUserLoading && <Loader title="MRT_Application" text={t("loadingUser")} />}
     </>
   );
 }
 
 const App = () => {
   return (
-    <Suspense fallback={<Loader title="JepRiaShowcase" text="Çàãðóçêà ïðèëîæåíèÿ..." />}>
+    <Suspense fallback={<Loader title="MRT_Application" text="Ð—Ð°Ð³Ñ€ÑƒÐ·ÐºÐ° Ð¿Ñ€Ð¸Ð»Ð¾Ð¶ÐµÐ½Ð¸Ñ..." />}>
       <Main />
     </Suspense>
   );

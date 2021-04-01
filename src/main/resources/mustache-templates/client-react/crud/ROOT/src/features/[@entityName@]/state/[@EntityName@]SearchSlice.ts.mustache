@@ -1,6 +1,10 @@
 import { createSearchSlice, SearchState } from "@jfront/core-redux-thunk";
 import { [@EntityName@], [@EntityName@]SearchTemplate } from "../api/[@EntityName@]Types";
 import { [@entityName@]SearchApi } from "../api/[@EntityName@]SearchApi";
+import { ThunkAction, Action, PayloadAction } from "@reduxjs/toolkit";
+import { SearchRequest } from "@jfront/core-rest";
+import { ColumnSortConfiguration } from "@jfront/ui-core";
+import queryString from "query-string";
 
 export const initialSearchState: SearchState<[@EntityName@]SearchTemplate, [@EntityName@]> = {
   searchRequest: { template: { maxRowCount: 250 } },
@@ -13,14 +17,75 @@ export const initialSearchState: SearchState<[@EntityName@]SearchTemplate, [@Ent
   resultSetSize: null,
 };
 
+type QuerySearch = {
+  template: SearchRequest<[@EntityName@]SearchTemplate>;
+  pageNumber: number;
+  pageSize: number;
+};
+
 export const slice = createSearchSlice({
   name: "[@entityName@]Search",
   initialState: initialSearchState,
-  reducers: {},
+  reducers: {
+    querySearch(state, action: PayloadAction<QuerySearch>) {
+      state.records = [];
+      state.isLoading = true;
+      state.searchRequest = action.payload.template;
+      state.pageNumber = action.payload.pageNumber;
+      state.pageSize = action.payload.pageSize;
+    },
+  },
 });
 
 const thunkCreators = slice.thunk;
 
+export const querySearch = function (
+  template: [@EntityName@]SearchTemplate,
+  listSortConfiguration: ColumnSortConfiguration[],
+  pageSize: number,
+  pageNumber: number
+): ThunkAction<
+  Promise<Array<[@EntityName@]>>,
+  SearchState<[@EntityName@]SearchTemplate, [@EntityName@]>,
+  unknown,
+  Action<string>
+> {
+  return async (dispatch) => {
+    try {
+      dispatch(
+        actions.querySearch({
+          template: {
+            template,
+            listSortConfiguration,
+          },
+          pageSize,
+          pageNumber,
+        })
+      );
+      const query = {
+        ...template,
+        sort: listSortConfiguration?.map(
+          (sortConfig) => `${sortConfig.columnName},${sortConfig.sortOrder}`
+        ),
+        page: pageNumber,
+        pageSize,
+      };
+      const result = await [@entityName@]SearchApi.querySearch(
+        queryString.stringify(query)
+      );
+      dispatch(
+        actions.searchSuccess({
+          records: result.data,
+          resultSetSize: result.resultsetSize,
+        })
+      );
+      return result.data;
+    } catch (error) {
+      dispatch(actions.failure({ error }));
+      return Promise.reject(error);
+    }
+  };
+};
 export const search = thunkCreators.searchThunk([@entityName@]SearchApi);
 export const postSearch = thunkCreators.postSearchThunk([@entityName@]SearchApi);
 export const postSearchRequest = thunkCreators.postSearchRequestThunk([@entityName@]SearchApi);

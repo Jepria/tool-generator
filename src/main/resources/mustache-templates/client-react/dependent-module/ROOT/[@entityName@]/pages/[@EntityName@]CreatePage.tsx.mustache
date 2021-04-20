@@ -3,7 +3,8 @@ import { useHistory, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
-import { ComboBox, ComboBoxItem, Form } from "@jfront/ui-core";
+import { Form } from "@jfront/ui-core";
+import { ComboBox, ComboBoxItem, DatePicker, NumberInput, TextInput } from "@jfront/ui-core";
 import {
   [@#fieldsCreate@]
   [@#isTypeOption@][@FieldName@]Option,[@/isTypeOption@]
@@ -32,6 +33,15 @@ const [@EntityName@]CreatePage = ({ formRef }) => {
   [@#isTypeOption@]const [[@fieldName@]Options, set[@FieldName@]Options] = useState<[@FieldName@]Option[]>();[@/isTypeOption@]
   [@/fieldsCreate@]
 
+  const onSave = useSelector(selectSaveOnCreate[@EntityName@]);
+  
+  useEffect(() => {
+      if (onSave) {
+        dispatch(submitSavedOnCreate[@EntityName@]());
+        formRef.current?.dispatchEvent(new Event("submit"));
+      }
+    }, [onSave]);
+  
   [@#fieldsCreate@]
   [@#isTypeOption@]
   useEffect(() => {
@@ -41,15 +51,6 @@ const [@EntityName@]CreatePage = ({ formRef }) => {
   }, []);
   [@/isTypeOption@]
   [@/fieldsCreate@]
-  
-  const onSave = useSelector(selectSaveOnCreate[@EntityName@]);
-
-  useEffect(() => {
-    if (onSave) {
-      dispatch(submitSavedOnCreate[@EntityName@]());
-      formRef.current?.dispatchEvent(new Event("submit"));
-    }
-  }, [onSave]);
 
   const formik = useFormik<[@EntityName@]Create>({
     initialValues: {
@@ -82,18 +83,9 @@ const [@EntityName@]CreatePage = ({ formRef }) => {
       [@/isFieldRequired@]
       [@/fieldsCreate@]
       
-      // TODO вызов должен быть не из formik.validate, а из formik.handleChange
-      updateQueryString(values);
-      
       return errors;
     },
   });
-
-  // TODO переместить на системный уровень
-  function updateQueryString(values) {
-    let query = queryString.stringify(values);
-    history.replace(`?${query}`);
-  }
 
   return (
     <>
